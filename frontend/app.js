@@ -13,6 +13,8 @@ async function loadTransactions(){
                 <td>${transaction.category}</td>
                 <td>${transaction.amount}</td>
                 <td>${transaction.description}</td>
+                <td><button onclick="deleteTransaction(${transaction.id})">🗑</button></td>
+
             `;
             tbody.appendChild(row);
         });
@@ -20,6 +22,12 @@ async function loadTransactions(){
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error)
     }
+}
+
+async function deleteTransaction(id) {
+    await fetch(`/transactions/${id}`, {method: "DELETE"});
+    document.getElementById("transaction-body").innerHTML = "";
+    loadTransactions();
 }
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models import Transaction
@@ -47,3 +47,20 @@ def create_transaction(data: TransactionCreate, db: Session = Depends(get_db)):
 def get_transaction(db: Session = Depends(get_db)):
     """Get all transaction"""
     return db.query(Transaction).all() 
+
+
+
+@router.delete("/transactions/{transaction_id}")
+def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
+    #1. Transaktion in Db suchen 
+    transaction = db.query(Transaction).filter(Transaction.id ==transaction_id).first()
+
+    #2. Falls nicht gefunden -> 404
+    if not transaction: 
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    #3. Löschne und speichern 
+    db.delete(transaction)
+    db.commit() 
+
+    return {"message": "deleted"}
