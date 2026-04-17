@@ -1,0 +1,46 @@
+body {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background-color: #5f89d8;
+}
+
+h1{
+  color: white;
+  text-align: center;
+}
+h2{
+    color: white; 
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+form{
+  display: flex;
+  flex-direction: column; /* Anordnung untereinander */
+  margin-bottom: 15px; /* Abstand zwischen den Gruppen */
+}
+input, select {
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
