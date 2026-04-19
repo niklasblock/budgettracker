@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.models import Transaction
@@ -42,3 +42,19 @@ def create_budget_goal(data: BudgetGoalCreate, db: Session = Depends(get_db)):
 def get_budget_goal(db: Session = Depends(get_db)):
     """Get all BudgetGoal"""
     return db.query(BudgetGoal).all() 
+
+@router.delete("/budget_goal/{budget_goal_id}")
+def delete_budgetgoal(budget_goal_id: int, db: Session = Depends(get_db)):
+    """Delete BudgetGoal by id"""
+    #1. Transaktion in Db suchen 
+    budget_goal = db.query(BudgetGoal).filter(BudgetGoal.id ==budget_goal_id).first()
+
+    #2. Falls nicht gefunden -> 404
+    if not budget_goal: 
+        raise HTTPException(status_code=404, detail="BudgetGoal not found")
+    
+    #3. Löschne und speichern 
+    db.delete(budget_goal)
+    db.commit() 
+
+    return {"message": "deleted"}

@@ -1,3 +1,4 @@
+// --- TRANSACTIONS 
 async function loadTransactions(){
     try {
         const response = await fetch("/transactions"); 
@@ -30,8 +31,39 @@ async function deleteTransaction(id) {
     loadTransactions();
 }
 
+// --- BUDGETGOALS
+async function loadBudgetGoals() {
+    try {
+        const response = await fetch("/budget_goal"); 
+        const data = await response.json(); 
+
+        const tbody = document.getElementById("budget-goal-body"); 
+
+        data.forEach(budget_goal => {
+            const row = document.createElement("tr"); 
+            row.innerHTML = `
+                <td>${budget_goal.category}</td>
+                <td>${budget_goal.limit}</td>
+                <td><button onclick="deleteBudgetGoals(${budget_goal.id})">🗑</button></td>
+            `; 
+            tbody.appendChild(row); 
+        })
+    } catch (error) {
+        console.error('Fehler beim Aufrufen:' , error)
+    }
+}
+
+async function deleteBudgetGoals(id) {
+    await fetch(`/budget_goal/${id}`, {method: "DELETE"}); 
+    document.getElementById("budget-goal-body").innerHTML = ""; 
+    loadBudgetGoals(); 
+}
+
+// --- Event Listener 
 document.addEventListener("DOMContentLoaded", () => {
     loadTransactions();
+    loadBudgetGoals(); 
+
     document.querySelector("form").addEventListener("submit", async (e) => {
         e.preventDefault(); // verhindert Reload
 
@@ -64,6 +96,34 @@ document.addEventListener("DOMContentLoaded", () => {
             // Tabelle neu laden
             document.getElementById("transaction-body").innerHTML = "";
             loadTransactions();
+
+        } catch (error) {
+            console.error("POST Fehler:", error);
+        }
+    });
+    
+    document.getElementById("budget-goal-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        
+        const budgetGoal = {
+            category: formData.get("category"),
+            limit: parseFloat(formData.get("limit"))
+        };
+
+        try {
+            const response = await fetch("/budget_goal", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(budgetGoal)
+            });
+
+            if (!response.ok) throw new Error("Fehler beim Speichern");
+
+            e.target.reset();
+            document.getElementById("budget-goal-body").innerHTML = "";
+            loadBudgetGoals();
 
         } catch (error) {
             console.error("POST Fehler:", error);

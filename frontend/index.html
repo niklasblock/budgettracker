@@ -55,6 +55,36 @@
         </table>
     </section>
 
+    <!-- Budget-Ziele -->
+    <section id="budget-goals">
+        <h2>Budget-Ziele</h2>
+        
+        <!-- Formular -->
+        <form id="budget-goal-form">
+            <!-- Felder: category (text), limit (number) -->
+            <label for="category">Category:</label>
+            <input type="text" id="category" name="category">
+
+            <label for="limit">Limit:</label>
+            <input type="number" id="limit" name="limit" step="0.01">
+
+            <button type="submit">Hinzufügen</button>
+        </form>
+
+        <!-- Tabelle -->
+        <table id="budget-goal-table">
+            <thead>
+                <tr>
+                    <th>Kategorie</th>
+                    <th>Limit</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+            <tbody id="budget-goal-body">
+            </tbody>
+        </table>
+    </section>
+
     <script src="/static/app.js"></script>
 </body>
 </html>
