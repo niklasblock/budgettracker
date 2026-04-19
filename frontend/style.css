@@ -1,46 +1,173 @@
-body {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    background-color: #5f89d8;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-h1{
-  color: white;
-  text-align: center;
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    color: #1a1a1a;
 }
-h2{
-    color: white; 
+
+h1 {
+    font-size: 20px;
+    font-weight: 500;
+    padding-bottom: 1rem;
+    border-bottom: 0.5px solid #e0e0e0;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.metric {
+    background: #ececec;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.metric-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.metric-value {
+    font-size: 22px;
+    font-weight: 500;
+}
+
+.metric-value.income { color: #3b6d11; }
+.metric-value.expense { color: #a32d2d; }
+
+.card {
+    background: white;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    font-size: 12px;
+    color: #666;
+}
+
+input, select {
+    background: #f5f5f5;
+    border: 0.5px solid #d0d0d0;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+    color: #1a1a1a;
+}
+
+button[type="submit"] {
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 13px;
 }
-th, td {
-    padding: 8px;
-    border: 1px solid #ddd;
+
+th {
+    font-size: 11px;
+    font-weight: 500;
+    color: #666;
     text-align: left;
+    padding: 0 8px 8px 0;
+    border-bottom: 0.5px solid #e0e0e0;
 }
-tr:nth-child(even) {
-    background-color: #f2f2f2;
+
+td {
+    padding: 8px 8px 8px 0;
+    border-bottom: 0.5px solid #e0e0e0;
 }
-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
+
+.badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+}
+
+.badge-income { background: #eaf3de; color: #3b6d11; }
+.badge-expense { background: #fcebeb; color: #a32d2d; }
+
+.delete-btn {
+    background: none;
     border: none;
     cursor: pointer;
-    border-radius: 4px;
+    color: #999;
+    font-size: 13px;
+    padding: 2px 6px;
 }
-form{
-  display: flex;
-  flex-direction: column; /* Anordnung untereinander */
-  margin-bottom: 15px; /* Abstand zwischen den Gruppen */
+
+.progress-bar {
+    height: 6px;
+    background: #ececec;
+    border-radius: 99px;
+    margin-top: 4px;
+    overflow: hidden;
+    width: 100%;
 }
-input, select {
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+
+.progress-fill {
+    height: 100%;
+    border-radius: 99px;
 }
+
+.progress-ok { background: #639922; }
+.progress-warn { background: #ba7517; }
+.progress-over { background: #a32d2d; }
+
+.budget-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.budget-info { font-size: 13px; }
+.budget-nums { font-size: 12px; color: #666; }

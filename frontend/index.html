@@ -7,108 +7,98 @@
 </head>
 <body>
     <h1>Budget Tracker</h1>
-    
+
+    <!-- Metric Cards -->
+    <div class="metric-grid">
+        <div class="metric">
+            <div class="metric-label">Einnahmen</div>
+            <div class="metric-value income" id="summary-income">—</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Ausgaben</div>
+            <div class="metric-value expense" id="summary-expenses">—</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Saldo</div>
+            <div class="metric-value" id="summary-balance">—</div>
+        </div>
+    </div>
+
     <!-- Transaktion hinzufügen -->
-    <section id="add-transaction">
+    <div class="card">
         <h2>Transaktion hinzufügen</h2>
-        <!-- Formular kommt hier rein -->
-         <form action="/transactions" method="post">
-            <label for="amount">Amount:</label>
-            <input type="number" id="amount" name="amount" step="0.01">
-
-            <label for="type">Type:</label>
-            <select name="type" id="type">
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-            </select>
-
-            <label for="category">Category:</label>
-            <input type="text" id="category" name="category">
-
-            <label for="description">Description:</label>
-            <input type="text" id="description" name="description">
-
-            <label for="date">Date:</label>
-            <input type="date" id="date" name="date">
-
+        <form id="transaction-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="amount">Betrag</label>
+                    <input type="number" id="amount" name="amount" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="type">Typ</label>
+                    <select name="type" id="type">
+                        <option value="income">Einnahme</option>
+                        <option value="expense">Ausgabe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="category">Kategorie</label>
+                    <input type="text" id="category" name="category">
+                </div>
+                <div class="form-group">
+                    <label for="date">Datum</label>
+                    <input type="date" id="date" name="date">
+                </div>
+                <div class="form-group full">
+                    <label for="description">Beschreibung</label>
+                    <input type="text" id="description" name="description">
+                </div>
+            </div>
             <button type="submit">Hinzufügen</button>
         </form>
+    </div>
 
-    </section>
-
-    <!-- Transaktionen anzeigen -->
-    <section id="transactions">
+    <!-- Transaktionen -->
+    <div class="card">
         <h2>Transaktionen</h2>
         <table id="transaction-table">
             <thead>
                 <tr>
                     <th>Datum</th>
-                    <th>Typ</th>
                     <th>Kategorie</th>
-                    <th>Betrag</th>
                     <th>Beschreibung</th>
-                    <th>Aktion</th>  
+                    <th>Typ</th>
+                    <th>Betrag</th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody id="transaction-body">
-            </tbody>
+            <tbody id="transaction-body"></tbody>
         </table>
-    </section>
-
-    <!--Transaction Summary-->
-    <section>
-        <h2>Übersicht Transaktionen</h2>
-        <p>Einnahmen: <span id="summary-income"></span></p>
-        <p>Ausgaben: <span id="summary-expenses"></span></p>
-        <p>Saldo: <span id="summary-balance"></span></p>
-    </section>
+    </div>
 
     <!-- Budget-Ziele -->
-    <section id="budget-goals">
+    <div class="card">
         <h2>Budget-Ziele</h2>
-        
-        <!-- Formular -->
         <form id="budget-goal-form">
-            <!-- Felder: category (text), limit (number) -->
-            <label for="category">Category:</label>
-            <input type="text" id="category" name="category">
-
-            <label for="limit">Limit:</label>
-            <input type="number" id="limit" name="limit" step="0.01">
-
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="bg-category">Kategorie</label>
+                    <input type="text" id="bg-category" name="category">
+                </div>
+                <div class="form-group">
+                    <label for="limit">Limit</label>
+                    <input type="number" id="limit" name="limit" step="0.01">
+                </div>
+            </div>
             <button type="submit">Hinzufügen</button>
         </form>
+        <div id="budget-goal-body" style="margin-top: 1rem;"></div>
+    </div>
 
-        <!-- Tabelle -->
-        <table id="budget-goal-table">
-            <thead>
-                <tr>
-                    <th>Kategorie</th>
-                    <th>Limit</th>
-                    <th>Aktion</th>
-                </tr>
-            </thead>
-            <tbody id="budget-goal-body">
-            </tbody>
-        </table>
-    </section>
-
-    <!--Budget Summary-->
-    <section id="budget-summary">
-        <h2>Übersicht Budget</h2>
-        <table id="bugdget-summary-table">
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Limit</th>
-                    <th>Spent</th>
-                    <th>Remaining</th>
-                </tr>
-            </thead>
-            <tbody id="budget-summary-body">
-            </tbody>
-        </table>
-    </section>
+    <!-- Budget Übersicht -->
+    <div class="card">
+        <h2>Budget Übersicht</h2>
+        <div id="budget-summary-body"></div>
+    </div>
 
     <script src="/static/app.js"></script>
 </body>
