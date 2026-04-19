@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func 
 from app.database import SessionLocal
 from app.models import Transaction
 from app.models import BudgetGoal
@@ -58,3 +59,25 @@ def delete_budgetgoal(budget_goal_id: int, db: Session = Depends(get_db)):
     db.commit() 
 
     return {"message": "deleted"}
+
+@router.get("/budget_goal/summary")
+def get_budget_goal_summary(db: Session = Depends(get_db)): 
+    """Return spending vs limit per category"""
+    goals = db.query(BudgetGoal).all() 
+
+    result = []
+    for goal in goals: 
+        # Ausgaben für diese Kategorie summieren 
+        spent = db.query(func.sum(Transaction.amount))\
+                    .filter(Transaction.category == goal.category)\
+                    .filter(Transaction.type == "expense")\
+                    .scalar() or 0.0
+        
+        result.append({
+            "category": goal.category, 
+            "limit": goal.limit, 
+            "spent": spent, 
+            "remaining": goal.limit - spent 
+        })
+
+    return result

@@ -59,6 +59,7 @@ async function loadBudgetGoals() {
             `; 
             tbody.appendChild(row); 
         }); 
+        loadBudgetSummary(); 
     } catch (error) {
         console.error('Fehler beim Aufrufen:' , error)
     }
@@ -68,6 +69,30 @@ async function deleteBudgetGoals(id) {
     await fetch(`/budget_goal/${id}`, {method: "DELETE"}); 
     document.getElementById("budget-goal-body").innerHTML = ""; 
     loadBudgetGoals(); 
+    loadBudgetSummary(); 
+}
+
+async function loadBudgetSummary() {
+    try {
+        const response = await fetch("/budget_goal/summary"); 
+        const data = await response.json(); 
+
+        const tbody = document.getElementById("budget-summary-body") 
+        tbody.innerHTML = ""; 
+
+        data.forEach(budget_summary => {
+            const row = document.createElement("tr"); 
+            row.innerHTML = `
+                <td>${budget_summary.category}</td>
+                <td>${budget_summary.limit}</td>
+                <td>${budget_summary.spent}</td>
+                <td>${budget_summary.remaining}</td>
+            `; 
+            tbody.appendChild(row); 
+        }); 
+    } catch (error) {
+        console.error('Fehler beim Aufrufen:', error)
+    }
 }
 
 // --- Event Listener 
@@ -75,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadTransactions();
     loadBudgetGoals(); 
     loadSummary(); 
+    loadBudgetSummary(); 
 
     document.querySelector("form").addEventListener("submit", async (e) => {
         e.preventDefault(); // verhindert Reload
