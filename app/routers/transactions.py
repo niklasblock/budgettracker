@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import date 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func 
 from app.database import SessionLocal
 from app.models import Transaction
 
@@ -64,3 +65,21 @@ def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
     db.commit() 
 
     return {"message": "deleted"}
+
+
+@router.get("/transactions/summary")
+def get_transaction_summary(db: Session = Depends(get_db)):
+    """Return summary of all transactions"""
+    income = db.query(func.sum(Transaction.amount))\
+               .filter(Transaction.type == "income")\
+               .scalar() or 0.0
+    
+    expenses = db.query(func.sum(Transaction.amount))\
+                 .filter(Transaction.type == "expense")\
+                 .scalar() or 0.0
+    
+    return {
+        "income": income,
+        "expenses": expenses,
+        "balance": income - expenses
+    }

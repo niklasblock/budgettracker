@@ -19,6 +19,7 @@ async function loadTransactions(){
             `;
             tbody.appendChild(row);
         });
+        loadSummary(); 
 
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error)
@@ -29,6 +30,16 @@ async function deleteTransaction(id) {
     await fetch(`/transactions/${id}`, {method: "DELETE"});
     document.getElementById("transaction-body").innerHTML = "";
     loadTransactions();
+    loadSummary(); 
+}
+
+async function loadSummary() {
+    const response = await fetch("/transactions/summary"); 
+    const data = await response.json(); 
+
+    document.getElementById("summary-income").textContent = data.income + " €";
+    document.getElementById("summary-expenses").textContent = data.expenses + " €";
+    document.getElementById("summary-balance").textContent = data.balance + " €";
 }
 
 // --- BUDGETGOALS
@@ -47,7 +58,7 @@ async function loadBudgetGoals() {
                 <td><button onclick="deleteBudgetGoals(${budget_goal.id})">🗑</button></td>
             `; 
             tbody.appendChild(row); 
-        })
+        }); 
     } catch (error) {
         console.error('Fehler beim Aufrufen:' , error)
     }
@@ -63,6 +74,7 @@ async function deleteBudgetGoals(id) {
 document.addEventListener("DOMContentLoaded", () => {
     loadTransactions();
     loadBudgetGoals(); 
+    loadSummary(); 
 
     document.querySelector("form").addEventListener("submit", async (e) => {
         e.preventDefault(); // verhindert Reload
