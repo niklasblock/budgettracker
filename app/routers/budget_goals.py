@@ -81,3 +81,15 @@ def get_budget_goal_summary(db: Session = Depends(get_db)):
         })
 
     return result
+
+@router.get("/transactions/by-category")
+def get_by_category(db: Session = Depends(get_db)): 
+    """Return total expesses grouped by category"""
+    results = db.query(
+        Transaction.category, 
+        func.sum(Transaction.amount)
+    ).filter(
+        Transaction.type == "expense"
+    ).group_by(Transaction.category).all()
+
+    return [{"category": r[0], "total": r[1]} for r in results]

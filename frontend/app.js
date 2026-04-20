@@ -21,6 +21,7 @@ async function loadTransactions(){
             tbody.appendChild(row);
         });
         loadSummary(); 
+        loadCategoryChart();
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error);
     }
@@ -31,6 +32,7 @@ async function deleteTransaction(id) {
     document.getElementById("transaction-body").innerHTML = "";
     loadTransactions();
     loadSummary(); 
+    loadCategoryChart();
 }
 
 async function loadSummary() {
@@ -102,12 +104,53 @@ async function loadBudgetSummary() {
     }
 }
 
+
+
+let categoryChart = null;
+
+async function loadCategoryChart() {
+    const response = await fetch("/transactions/by-category");
+    const data = await response.json();
+
+    const labels = data.map(d => d.category);
+    const values = data.map(d => d.total);
+
+    const ctx = document.getElementById("category-chart").getContext("2d");
+
+    if (categoryChart) {
+        categoryChart.destroy();
+    }
+
+    categoryChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Ausgaben (€)",
+                data: values,
+                backgroundColor: "#a32d2d",
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
 // --- Event Listener 
 document.addEventListener("DOMContentLoaded", () => {
     loadTransactions();
     loadBudgetGoals(); 
     loadSummary(); 
     loadBudgetSummary(); 
+    loadCategoryChart(); 
 
     document.querySelector("form").addEventListener("submit", async (e) => {
         e.preventDefault(); // verhindert Reload
