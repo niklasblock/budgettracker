@@ -1,7 +1,8 @@
 // --- TRANSACTIONS 
 async function loadTransactions(){
     try {
-        const response = await fetch("/transactions"); 
+        const month = document.getElementById("month-filter").value;
+        const response = await fetch(`/transactions?month=${month}`);
         const data = await response.json(); 
         const tbody = document.getElementById("transaction-body");
         tbody.innerHTML = "";
@@ -184,6 +185,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error("POST Fehler:", error);
         }
+    });
+    document.getElementById("month-filter").addEventListener("change", () => {
+        loadTransactions();
     });
 }); 
     

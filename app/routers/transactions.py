@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import date 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func 
+from sqlalchemy import func, extract
 from app.database import SessionLocal
 from app.models import Transaction
 
@@ -45,9 +45,16 @@ def create_transaction(data: TransactionCreate, db: Session = Depends(get_db)):
     return transaction
 
 @router.get("/transactions")
-def get_transaction(db: Session = Depends(get_db)):
+def get_transaction(month: str | None = None, db: Session = Depends(get_db)):
     """Get all transaction"""
-    return db.query(Transaction).all() 
+    if month: 
+        year, mon = month.split("-")
+        return db.query(Transaction)\
+                    .filter(extract("year", Transaction.date) == int(year))\
+                    .filter(extract("month", Transaction.date) == int(mon))\
+                    .all()
+    else: 
+        return db.query(Transaction).all() 
 
 
 
