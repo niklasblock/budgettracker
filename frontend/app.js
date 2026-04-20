@@ -121,6 +121,12 @@ document.addEventListener("DOMContentLoaded", () => {
             date: formData.get("date")
         };
 
+        if (!transaction.amount || !transaction.category || !transaction.date) {
+            document.getElementById("transaction-error").style.display = "block";
+            return;
+        }
+        document.getElementById("transaction-error").style.display = "none";
+
         try {
             const response = await fetch("/transactions", {
                 method: "POST",
@@ -155,6 +161,12 @@ document.addEventListener("DOMContentLoaded", () => {
             category: formData.get("category"),
             limit: parseFloat(formData.get("limit"))
         };
+
+        if (!budgetGoal.category || !budgetGoal.limit) {
+            document.getElementById("budget-goal-error").style.display = "block";
+            return;
+        }
+        document.getElementById("budget-goal-error").style.display = "none";
 
         try {
             const response = await fetch("/budget_goal", {
