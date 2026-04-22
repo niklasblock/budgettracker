@@ -104,7 +104,7 @@ async function loadBudgetSummary() {
     }
 }
 
-
+// --- Category 
 
 let categoryChart = null;
 
@@ -144,6 +144,48 @@ async function loadCategoryChart() {
     });
 }
 
+async function loadCategories() {
+    const response = await fetch("/categories");
+    const data = await response.json();
+
+    const selects = ["category", "bg-category"];
+    
+    selects.forEach(id => {
+        const select = document.getElementById(id);
+        select.innerHTML = '<option value="">Kategorie wählen</option>';
+        data.forEach(cat => {
+            const option = document.createElement("option");
+            option.value = cat.name;
+            option.textContent = cat.name;
+            select.appendChild(option);
+        });
+    });
+}
+
+async function loadCategoryList() {
+    const response = await fetch("/categories");
+    const data = await response.json();
+
+    const container = document.getElementById("category-list");
+    container.innerHTML = "";
+
+    data.forEach(cat => {
+        const row = document.createElement("div");
+        row.className = "budget-row";
+        row.innerHTML = `
+            <div class="budget-info">${cat.name}</div>
+            <button class="delete-btn" onclick="deleteCategory(${cat.id})">✕</button>
+        `;
+        container.appendChild(row);
+    });
+}
+
+async function deleteCategory(id) {
+    await fetch(`/categories/${id}`, {method: "DELETE"});
+    loadCategoryList();
+    loadCategories();
+}
+
 // --- Event Listener 
 document.addEventListener("DOMContentLoaded", () => {
     loadTransactions();
@@ -151,6 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loadSummary(); 
     loadBudgetSummary(); 
     loadCategoryChart(); 
+    loadCategories(); 
+    loadCategoryList(); 
 
     document.querySelector("form").addEventListener("submit", async (e) => {
         e.preventDefault(); // verhindert Reload
@@ -196,6 +240,54 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
+    document.getElementById("category-form").addEventListener("submit", async (e) => {
+        e.preventDefault(); 
+
+        const formData = new FormData(e.target); 
+
+        const category = {
+            name: formData.get("name")
+        }; 
+        console.info("Category", category)
+        if (!category.name) {
+            document.getElementById("category-error").style.display = "block"; 
+            return; 
+        }
+        document.getElementById("category-error").style.display = "none"; 
+
+        try{
+            const response = await fetch("/categories", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(category)
+            });
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    document.getElementById("category-error").textContent = "Kategorie existiert bereits.";
+                    document.getElementById("category-error").style.display = "block";
+                }
+                throw new Error("Fehler beim Speichern");
+            }
+
+            // Formular leeren
+            e.target.reset();
+
+            document.getElementById("category-list").innerHTML = ""; 
+            loadCategories();
+            loadCategoryList(); 
+
+
+
+
+        } catch (error) {
+            console.error("POST Fehler:", error);
+        }
+
+    });
+
     document.getElementById("budget-goal-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         

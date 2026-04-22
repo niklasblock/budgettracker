@@ -23,3 +23,11 @@ class BudgetGoal(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     category: Mapped[str] = mapped_column(String)
     limit: Mapped[float] = mapped_column(Float)
+
+
+class Category(Base):
+    """Table for categories"""
+    __tablename__ = "categories"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String, unique=True)

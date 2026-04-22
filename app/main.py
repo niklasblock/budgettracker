@@ -2,11 +2,12 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.database import engine, Base
 from app import models 
-from app.routers import transactions, budget_goals
+from app.routers import transactions, budget_goals, categories
 
 app = FastAPI() 
 app.include_router(transactions.router)
 app.include_router(budget_goals.router)
+app.include_router(categories.router)
 
 #Frontend-Dateien ausliefern 
 app.mount("/static", StaticFiles(directory="frontend"), name="static") 
