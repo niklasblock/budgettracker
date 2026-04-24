@@ -136,6 +136,41 @@
         <div id="category-list" style="margin-top: 1rem;"></div>
     </div>
 
+    <div class="card">
+        <h2>Daueraufträge</h2>
+        <form id="recurring-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="rec-amount">Betrag</label>
+                    <input type="number" id="rec-amount" name="amount" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="rec-type">Typ</label>
+                    <select id="rec-type" name="type">
+                        <option value="income">Einnahme</option>
+                        <option value="expense">Ausgabe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rec-category">Kategorie</label>
+                    <select id="rec-category" name="category">
+                        <option value="">Kategorie wählen</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rec-next-due">Nächste Ausführung</label>
+                    <input type="date" id="rec-next-due" name="next_due">
+                </div>
+                <div class="form-group full">
+                    <label for="rec-description">Beschreibung</label>
+                    <input type="text" id="rec-description" name="description">
+                </div>
+            </div>
+            <button type="submit">Hinzufügen</button>
+        </form>
+        <div id="recurring-list" style="margin-top: 1rem;"></div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="/static/app.js"></script>
 </body>

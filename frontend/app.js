@@ -148,7 +148,7 @@ async function loadCategories() {
     const response = await fetch("/categories");
     const data = await response.json();
 
-    const selects = ["category", "bg-category"];
+    const selects = ["category", "bg-category", "rec-category"];
     
     selects.forEach(id => {
         const select = document.getElementById(id);
@@ -185,6 +185,34 @@ async function deleteCategory(id) {
     loadCategoryList();
     loadCategories();
 }
+
+// --- Recurring
+async function loadRecurring() {
+    const response = await fetch("/recurring"); 
+    const data = await response.json(); 
+
+    const container = document.getElementById("recurring-list"); 
+    container.innerHTML = ""; 
+
+    data.forEach(r => {
+        const row = document.createElement("div");
+        row.className = "budget-row";
+        row.innerHTML = `
+            <div>
+                <div class="budget-info">${r.description || r.category}</div>
+                <div class="budget-nums">${r.amount} € — monatlich ab ${r.next_due}</div>
+            </div>
+            <button class="delete-btn" onclick="deleteRecurring(${r.id})">✕</button>
+        `;
+        container.appendChild(row);
+    });
+}
+
+async function deleteRecurring(id) {
+    await fetch(`/recurring/${id}`, {method: "DELETE"}); 
+    loadRecurring(); 
+}
+
 
 // --- Event Listener 
 document.addEventListener("DOMContentLoaded", () => {
@@ -323,6 +351,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.getElementById("month-filter").addEventListener("change", () => {
         loadTransactions();
+    });
+    document.getElementById("recurring-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const recurring = {
+            amount: parseFloat(formData.get("amount")),
+            type: formData.get("type"),
+            category: formData.get("category"),
+            description: formData.get("description"),
+            interval: "monthly",
+            next_due: formData.get("next_due")
+        };
+
+        if (!recurring.amount || !recurring.category || !recurring.next_due) return;
+
+        await fetch("/recurring", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(recurring)
+        });
+
+        e.target.reset();
+        loadRecurring();
+        loadCategories();
     });
 }); 
     
