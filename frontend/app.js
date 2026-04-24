@@ -22,6 +22,7 @@ async function loadTransactions(){
         });
         loadSummary(); 
         loadCategoryChart();
+        loadYearlyChart(); 
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error);
     }
@@ -33,6 +34,7 @@ async function deleteTransaction(id) {
     loadTransactions();
     loadSummary(); 
     loadCategoryChart();
+    loadYearlyChart(); 
 }
 
 async function loadSummary() {
@@ -42,6 +44,52 @@ async function loadSummary() {
     document.getElementById("summary-income").textContent = data.income + " €";
     document.getElementById("summary-expenses").textContent = data.expenses + " €";
     document.getElementById("summary-balance").textContent = data.balance + " €";
+}
+
+let yearlyChart = null;
+
+async function loadYearlyChart() {
+    const response = await fetch("/transactions/yearly");
+    const data = await response.json();
+
+    const labels = data.map(d => d.month);
+    const income = data.map(d => d.income);
+    const expenses = data.map(d => d.expenses);
+
+    const ctx = document.getElementById("yearly-chart").getContext("2d");
+
+    if (yearlyChart) {
+        yearlyChart.destroy();
+    }
+
+    yearlyChart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Einnahmen",
+                    data: income,
+                    borderColor: "#3b6d11",
+                    backgroundColor: "rgba(59, 109, 17, 0.1)",
+                    tension: 0.3
+                },
+                {
+                    label: "Ausgaben",
+                    data: expenses,
+                    borderColor: "#a32d2d",
+                    backgroundColor: "rgba(163, 45, 45, 0.1)",
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
 }
 
 // --- BUDGETGOALS
@@ -223,6 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadCategoryChart(); 
     loadCategories(); 
     loadCategoryList(); 
+    loadYearlyChart(); 
 
     document.querySelector("form").addEventListener("submit", async (e) => {
         e.preventDefault(); // verhindert Reload
@@ -262,6 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Tabelle neu laden
             document.getElementById("transaction-body").innerHTML = "";
             loadTransactions();
+            loadYearlyChart(); 
 
         } catch (error) {
             console.error("POST Fehler:", error);

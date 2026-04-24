@@ -90,3 +90,24 @@ def get_transaction_summary(db: Session = Depends(get_db)):
         "expenses": expenses,
         "balance": income - expenses
     }
+
+@router.get("/transactions/yearly")
+def get_transactions_yearly(db: Session = Depends(get_db)):
+    """Returns income and expenses per month"""
+    from sqlalchemy import extract, case
+    
+    results = db.query(
+        extract("year", Transaction.date).label("year"),
+        extract("month", Transaction.date).label("month"),
+        func.sum(case((Transaction.type == "income", Transaction.amount), else_=0)).label("income"),
+        func.sum(case((Transaction.type == "expense", Transaction.amount), else_=0)).label("expenses")
+    ).group_by("year", "month").order_by("year", "month").all()
+
+    return [
+        {
+            "month": f"{int(r.year)}-{int(r.month):02d}",
+            "income": r.income,
+            "expenses": r.expenses
+        }
+        for r in results
+    ]
