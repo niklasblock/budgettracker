@@ -171,3 +171,49 @@ td {
 
 .budget-info { font-size: 13px; }
 .budget-nums { font-size: 12px; color: #666; }
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 0.5px solid #e0e0e0;
+    margin-bottom: 1.5rem;
+}
+
+.nav-title {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-btn {
+    background: none;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #666;
+}
+
+.nav-btn.active {
+    background: #1a1a1a;
+    color: white;
+    border-color: #1a1a1a;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.page {
+    display: block;
+}

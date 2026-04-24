@@ -261,6 +261,14 @@ async function deleteRecurring(id) {
     loadRecurring(); 
 }
 
+// --- Show Page 
+function showPage(page) {
+    document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+    document.getElementById(page).style.display = "block";
+    
+    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+    event.target.classList.add("active");
+}
 
 // --- Event Listener 
 document.addEventListener("DOMContentLoaded", () => {
