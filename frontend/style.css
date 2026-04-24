@@ -217,3 +217,55 @@ nav {
 .page {
     display: block;
 }
+
+
+body.dark {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+body.dark .card {
+    background: #2a2a2a;
+    border-color: #3a3a3a;
+}
+
+body.dark .metric {
+    background: #2a2a2a;
+}
+
+body.dark input, 
+body.dark select {
+    background: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark table td,
+body.dark table th {
+    border-color: #3a3a3a;
+}
+
+body.dark .nav-btn {
+    border-color: #3a3a3a;
+    color: #aaa;
+}
+
+body.dark .nav-btn.active {
+    background: #e0e0e0;
+    color: #1a1a1a;
+    border-color: #e0e0e0;
+}
+
+body.dark nav {
+    border-color: #3a3a3a;
+}
+
+body.dark .progress-bar {
+    background: #3a3a3a;
+}
+
+body.dark .metric-label,
+body.dark .budget-nums,
+body.dark h2 {
+    color: #aaa;
+}

@@ -11,9 +11,10 @@
     <nav>
         <span class="nav-title">Budget Tracker</span>
         <div class="nav-links">
-            <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
-            <button class="nav-btn" onclick="showPage('transaktionen')">Transaktionen</button>
-            <button class="nav-btn" onclick="showPage('verwaltung')">Verwaltung</button>
+            <button class="nav-btn active" onclick="showPage('dashboard', this)">Dashboard</button>
+            <button class="nav-btn" onclick="showPage('transaktionen', this)">Transaktionen</button>
+            <button class="nav-btn" onclick="showPage('verwaltung', this)">Verwaltung</button>
+            <button class="nav-btn" id="dark-toggle" onclick="toggleDark()">🌙</button>
         </div>
     </nav>
 

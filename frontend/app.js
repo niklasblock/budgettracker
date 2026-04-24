@@ -270,6 +270,20 @@ function showPage(page) {
     event.target.classList.add("active");
 }
 
+// --- Dark Mode
+function toggleDark() {
+    document.body.classList.toggle("dark");
+    const btn = document.getElementById("dark-toggle");
+    btn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+    localStorage.setItem("dark", document.body.classList.contains("dark"));
+}
+
+// Dark Mode beim Start wiederherstellen
+if (localStorage.getItem("dark") === "true") {
+    document.body.classList.add("dark");
+    document.getElementById("dark-toggle").textContent = "☀️";
+}
+
 // --- Event Listener 
 document.addEventListener("DOMContentLoaded", () => {
     loadTransactions();
