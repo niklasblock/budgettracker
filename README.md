@@ -11,18 +11,31 @@ pip install -e .
 uvicorn app.main:app --reload
 ```
 
+## macOS App
+To launch the app with a double-click, create the app bundle:
+
+```bash
+mkdir -p BudgetTracker.app/Contents/MacOS
+cp launch.sh BudgetTracker.app/Contents/MacOS/launch
+chmod +x BudgetTracker.app/Contents/MacOS/launch
+```
+
+Then create `BudgetTracker.app/Contents/Info.plist` with the contents from the repository.
+
 ## Usage
 Open your browser and navigate to:
 http://127.0.0.1:8000/static/index.html
 
 
 ## Features
-- Add, view and delete transactions (income & expenses)
-- Set budget goals per category
-- Transaction summary (income, expenses, balance)
-- Budget goal comparison (spent vs limit)
+- Dashboard with metrics, charts, and budget overview
+- Transactions with a monthly filter and “planned/paid” status
+- Recurring payments that are automatically marked as “planned”
+- Manage categories
+- Budget goals with progress bars
+- Dark Mode
+- macOS App Launcher
 
 ## Roadmap
-- [ ] Monatsfiler - Transaktionen nach Monat filtern 
-- [ ] Farb-Feedback im Budget-Vergleich - rot/grün je nach Status 
-- [ ] Formular-Validierung - leere Felder abfrangen, Fehlermeldungen anzeigen 
+- [ ] Import/Export data using csv 
+- [ ] Annual overview of standing orders and subscriptions
