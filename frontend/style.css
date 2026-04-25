@@ -269,3 +269,22 @@ body.dark .budget-nums,
 body.dark h2 {
     color: #aaa;
 }
+
+.status-btn {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.status-btn.planned {
+    background: #f5f0e0;
+    color: #ba7517;
+}
+
+.status-btn.paid {
+    background: #eaf3de;
+    color: #3b6d11;
+}

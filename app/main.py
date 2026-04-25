@@ -49,7 +49,8 @@ def process_recurring_transactions():
                 type=r.type,
                 category=r.category,
                 description=r.description,
-                date=r.next_due
+                date=r.next_due,
+                status="planned"
             )
             db.add(transaction)
             

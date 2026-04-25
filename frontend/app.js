@@ -4,18 +4,23 @@ async function loadTransactions(){
         const month = document.getElementById("month-filter").value;
         const response = await fetch(`/transactions?month=${month}`);
         const data = await response.json(); 
+        console.log(data); 
         const tbody = document.getElementById("transaction-body");
         tbody.innerHTML = "";
         data.forEach(transaction => {
             const row = document.createElement("tr"); 
             const badgeClass = transaction.type === "income" ? "badge-income" : "badge-expense";
             const badgeLabel = transaction.type === "income" ? "Einnahme" : "Ausgabe";
+            const statusBtn = transaction.status === "planned" 
+                ? `<button class="status-btn planned" onclick="toggleStatus(${transaction.id})">geplant</button>`
+                : `<button class="status-btn paid" onclick="toggleStatus(${transaction.id})">✓</button>`;
             row.innerHTML = `
                 <td>${transaction.date}</td>
                 <td>${transaction.category}</td>
                 <td style="color:#666">${transaction.description || "—"}</td>
                 <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
                 <td>${transaction.amount} €</td>
+                <td>${statusBtn}</td>
                 <td><button class="delete-btn" onclick="deleteTransaction(${transaction.id})">✕</button></td>
             `;
             tbody.appendChild(row);
@@ -26,6 +31,11 @@ async function loadTransactions(){
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error);
     }
+}
+
+async function toggleStatus(id) {
+    await fetch(`/transactions/${id}/status`, {method: "PATCH"});
+    loadTransactions();
 }
 
 async function deleteTransaction(id) {
@@ -299,6 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadCategories(); 
     loadCategoryList(); 
     loadYearlyChart(); 
+    loadRecurring(); 
 
     document.querySelector("form").addEventListener("submit", async (e) => {
         e.preventDefault(); // verhindert Reload

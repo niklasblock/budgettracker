@@ -71,6 +71,7 @@ def get_budget_goal_summary(db: Session = Depends(get_db)):
         spent = db.query(func.sum(Transaction.amount))\
                     .filter(Transaction.category == goal.category)\
                     .filter(Transaction.type == "expense")\
+                    .filter(Transaction.status == "paid")\
                     .scalar() or 0.0
         
         result.append({

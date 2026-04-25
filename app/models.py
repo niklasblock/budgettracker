@@ -14,6 +14,7 @@ class Transaction(Base):
     category: Mapped[str] = mapped_column(String)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     date: Mapped[datetime] = mapped_column(Date)
+    status: Mapped[str] = mapped_column(String, default="paid")
 
 
 class BudgetGoal(Base):

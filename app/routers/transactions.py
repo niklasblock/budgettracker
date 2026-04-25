@@ -56,33 +56,17 @@ def get_transaction(month: str | None = None, db: Session = Depends(get_db)):
     else: 
         return db.query(Transaction).all() 
 
-
-
-@router.delete("/transactions/{transaction_id}")
-def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
-    #1. Transaktion in Db suchen 
-    transaction = db.query(Transaction).filter(Transaction.id ==transaction_id).first()
-
-    #2. Falls nicht gefunden -> 404
-    if not transaction: 
-        raise HTTPException(status_code=404, detail="Transaction not found")
-    
-    #3. Löschne und speichern 
-    db.delete(transaction)
-    db.commit() 
-
-    return {"message": "deleted"}
-
-
 @router.get("/transactions/summary")
 def get_transaction_summary(db: Session = Depends(get_db)):
     """Return summary of all transactions"""
     income = db.query(func.sum(Transaction.amount))\
-               .filter(Transaction.type == "income")\
-               .scalar() or 0.0
+            .filter(Transaction.type == "income")\
+            .filter(Transaction.status == "paid")\
+            .scalar() or 0.0
     
     expenses = db.query(func.sum(Transaction.amount))\
                  .filter(Transaction.type == "expense")\
+                 .filter(Transaction.status == "paid")\
                  .scalar() or 0.0
     
     return {
@@ -101,7 +85,8 @@ def get_transactions_yearly(db: Session = Depends(get_db)):
         extract("month", Transaction.date).label("month"),
         func.sum(case((Transaction.type == "income", Transaction.amount), else_=0)).label("income"),
         func.sum(case((Transaction.type == "expense", Transaction.amount), else_=0)).label("expenses")
-    ).group_by("year", "month").order_by("year", "month").all()
+    ).filter(Transaction.status == "paid")\
+        .group_by("year", "month").order_by("year", "month").all()
 
     return [
         {
@@ -111,3 +96,35 @@ def get_transactions_yearly(db: Session = Depends(get_db)):
         }
         for r in results
     ]
+
+@router.delete("/transactions/{transaction_id}")
+def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
+    #1. Transaktion in Db suchen 
+    transaction = db.query(Transaction).filter(Transaction.id ==transaction_id).first()
+
+    #2. Falls nicht gefunden -> 404
+    if not transaction: 
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    #3. Löschne und speichern 
+    db.delete(transaction)
+    db.commit() 
+
+    return {"message": "deleted"}
+
+
+@router.patch("/transactions/{transaction_id}/status")
+def update_status(transaction_id: int, db: Session = Depends(get_db)):
+    """Toggle transaction status between planned and paid"""
+    transaction = db.query(Transaction)\
+                    .filter(Transaction.id == transaction_id)\
+                    .first()
+    
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    transaction.status = "paid" if transaction.status == "planned" else "planned"
+    db.commit()
+    db.refresh(transaction)
+    
+    return transaction
