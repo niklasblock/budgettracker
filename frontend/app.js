@@ -432,6 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.target.reset();
             document.getElementById("budget-goal-body").innerHTML = "";
             loadBudgetGoals();
+            loadBudgetSummary(); 
 
         } catch (error) {
             console.error("POST Fehler:", error);
