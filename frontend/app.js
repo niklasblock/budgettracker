@@ -282,15 +282,15 @@ function showPage(page) {
 
 // --- Dark Mode
 function toggleDark() {
-    document.body.classList.toggle("dark");
+    document.documentElement.classList.toggle("dark");
     const btn = document.getElementById("dark-toggle");
-    btn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
-    localStorage.setItem("dark", document.body.classList.contains("dark"));
+    btn.textContent = document.documentElement.classList.contains("dark") ? "☀️" : "🌙";
+    localStorage.setItem("dark", document.documentElement.classList.contains("dark"));
 }
 
 // Dark Mode beim Start wiederherstellen
 if (localStorage.getItem("dark") === "true") {
-    document.body.classList.add("dark");
+    document.documentElement.classList.add("dark");
     document.getElementById("dark-toggle").textContent = "☀️";
 }
 

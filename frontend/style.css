@@ -13,6 +13,11 @@ body {
     color: #1a1a1a;
 }
 
+html.dark body {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
 h1 {
     font-size: 20px;
     font-weight: 500;
@@ -219,54 +224,54 @@ nav {
 }
 
 
-body.dark {
+html.dark body{
     background-color: #1a1a1a;
     color: #e0e0e0;
 }
 
-body.dark .card {
+html.dark body .card {
     background: #2a2a2a;
     border-color: #3a3a3a;
 }
 
-body.dark .metric {
+html.dark body .metric {
     background: #2a2a2a;
 }
 
-body.dark input, 
-body.dark select {
+html.dark body input, 
+html.dark body select {
     background: #333;
     border-color: #444;
     color: #e0e0e0;
 }
 
-body.dark table td,
-body.dark table th {
+html.dark body table td,
+html.dark body table th {
     border-color: #3a3a3a;
 }
 
-body.dark .nav-btn {
+html.dark body .nav-btn {
     border-color: #3a3a3a;
     color: #aaa;
 }
 
-body.dark .nav-btn.active {
+html.dark body .nav-btn.active {
     background: #e0e0e0;
     color: #1a1a1a;
     border-color: #e0e0e0;
 }
 
-body.dark nav {
+html.dark body nav {
     border-color: #3a3a3a;
 }
 
-body.dark .progress-bar {
+html.dark body .progress-bar {
     background: #3a3a3a;
 }
 
-body.dark .metric-label,
-body.dark .budget-nums,
-body.dark h2 {
+html.dark body .metric-label,
+html.dark body .budget-nums,
+html.dark body h2 {
     color: #aaa;
 }
 
