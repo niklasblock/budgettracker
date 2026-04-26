@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
             date: formData.get("date")
         };
 
-        if (!transaction.amount || !transaction.category || !transaction.date) {
+        if (!transaction.amount || !transaction.category || !transaction.date || !transaction.type) {
             document.getElementById("transaction-error").style.display = "block";
             return;
         }
