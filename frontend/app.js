@@ -28,6 +28,7 @@ async function loadTransactions(){
         loadSummary(); 
         loadCategoryChart();
         loadYearlyChart(); 
+        loadBudgetSummary();
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error);
     }
