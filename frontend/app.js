@@ -51,9 +51,9 @@ async function loadSummary() {
     const response = await fetch("/transactions/summary"); 
     const data = await response.json(); 
 
-    document.getElementById("summary-income").textContent = data.income + " €";
-    document.getElementById("summary-expenses").textContent = data.expenses + " €";
-    document.getElementById("summary-balance").textContent = data.balance + " €";
+    document.getElementById("summary-income").textContent = data.income.toFixed(2) + " €";
+    document.getElementById("summary-expenses").textContent = data.expenses.toFixed(2) + " €";
+    document.getElementById("summary-balance").textContent = data.balance.toFixed(2) + " €";
 }
 
 let yearlyChart = null;
