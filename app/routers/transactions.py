@@ -13,7 +13,13 @@ class TransactionCreate(BaseModel):
     description: str | None = None 
     date: date 
 
-
+class TransactionUpdate(BaseModel):
+    amount: float
+    type: str
+    category: str
+    description: str | None = None
+    date: date
+    status: str
 
 
 router = APIRouter()
@@ -127,4 +133,21 @@ def update_status(transaction_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(transaction)
     
+    return transaction
+
+@router.put("/transactions/{transaction_id}")
+def update_transaction(transaction_id: int, data: TransactionUpdate, db: Session = Depends(get_db)):
+    """Update an existing transaction"""
+    transaction = db.query(Transaction)\
+                    .filter(Transaction.id == transaction_id)\
+                    .first()
+    
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    for key, value in data.model_dump().items():
+        setattr(transaction, key, value)
+    
+    db.commit()
+    db.refresh(transaction)
     return transaction

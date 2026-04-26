@@ -4,7 +4,7 @@ async function loadTransactions(){
         const month = document.getElementById("month-filter").value;
         const response = await fetch(`/transactions?month=${month}`);
         const data = await response.json(); 
-        console.log(data); 
+        
         const tbody = document.getElementById("transaction-body");
         tbody.innerHTML = "";
         data.forEach(transaction => {
@@ -21,6 +21,7 @@ async function loadTransactions(){
                 <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
                 <td>${transaction.amount} €</td>
                 <td>${statusBtn}</td>
+                <td><button class="delete-btn" onclick="editTransaction(${transaction.id}, ${transaction.amount}, '${transaction.type}', '${transaction.category}', '${transaction.description || ""}', '${transaction.date}', '${transaction.status}')">✎</button></td>
                 <td><button class="delete-btn" onclick="deleteTransaction(${transaction.id})">✕</button></td>
             `;
             tbody.appendChild(row);
@@ -37,6 +38,28 @@ async function loadTransactions(){
 async function toggleStatus(id) {
     await fetch(`/transactions/${id}/status`, {method: "PATCH"});
     loadTransactions();
+}
+
+let editingId = null;
+
+function editTransaction(id, amount, type, category, description, date, status) {
+    editingId = id;
+    document.getElementById("edit-amount").value = amount;
+    document.getElementById("edit-type").value = type;
+    document.getElementById("edit-category").value = category;
+    document.getElementById("edit-description").value = description;
+    document.getElementById("edit-date").value = date;
+    
+    // Kategorien im Edit-Dropdown laden
+    const select = document.getElementById("edit-category");
+    select.value = category;
+    
+    document.getElementById("edit-modal").style.display = "flex";
+}
+
+function closeEditModal() {
+    document.getElementById("edit-modal").style.display = "none";
+    editingId = null;
 }
 
 async function deleteTransaction(id) {
@@ -229,7 +252,7 @@ async function loadCategories() {
     const response = await fetch("/categories");
     const data = await response.json();
 
-    const selects = ["category", "bg-category", "rec-category"];
+    const selects = ["category", "bg-category", "rec-category", "edit-category"];
     
     selects.forEach(id => {
         const select = document.getElementById(id);
@@ -295,12 +318,16 @@ async function deleteRecurring(id) {
 }
 
 // --- Show Page 
-function showPage(page) {
+function showPage(page, btn = null) {
     document.querySelectorAll(".page").forEach(p => p.style.display = "none");
     document.getElementById(page).style.display = "block";
     
-    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
-    event.target.classList.add("active");
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    if (btn) {
+        btn.classList.add("active");
+    } else if (event && event.target) {
+        event.target.classList.add("active");
+    }
 }
 
 // --- Dark Mode
@@ -354,25 +381,29 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("transaction-error").style.display = "none";
 
         try {
-            const response = await fetch("/transactions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(transaction)
-            });
-
-            if (!response.ok) {
-                throw new Error("Fehler beim Speichern");
+            if (editingId) {
+                // PUT
+                await fetch(`/transactions/${editingId}`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({...transaction, status: "paid"})
+                });
+                editingId = null;
+                document.querySelector("#transaction-form button[type='submit']").textContent = "Hinzufügen";
+            } else {
+                // POST
+                const response = await fetch("/transactions", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(transaction)
+                });
+                if (!response.ok) throw new Error("Fehler beim Speichern");
             }
 
-            // Formular leeren
             e.target.reset();
-
-            // Tabelle neu laden
             document.getElementById("transaction-body").innerHTML = "";
             loadTransactions();
-            loadYearlyChart(); 
+            loadYearlyChart();
 
         } catch (error) {
             console.error("POST Fehler:", error);
@@ -437,7 +468,6 @@ document.addEventListener("DOMContentLoaded", () => {
             limit: parseFloat(formData.get("limit")),
             goal_type: formData.get("goal_type")  
         };
-        console.log(budgetGoal);  // NEU
 
         if (!budgetGoal.category || !budgetGoal.limit) {
             document.getElementById("budget-goal-error").style.display = "block";
@@ -489,6 +519,28 @@ document.addEventListener("DOMContentLoaded", () => {
         e.target.reset();
         loadRecurring();
         loadCategories();
+    });
+    document.getElementById("edit-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        
+        const transaction = {
+            amount: parseFloat(formData.get("amount")),
+            type: formData.get("type"),
+            category: formData.get("category"),
+            description: formData.get("description"),
+            date: formData.get("date"),
+            status: "paid"
+        };
+
+        await fetch(`/transactions/${editingId}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(transaction)
+        });
+
+        closeEditModal();
+        loadTransactions();
     });
 }); 
     
