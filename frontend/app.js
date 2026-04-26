@@ -257,8 +257,8 @@ async function loadRecurring() {
         row.className = "budget-row";
         row.innerHTML = `
             <div>
-                <div class="budget-info">${r.description || r.category}</div>
-                <div class="budget-nums">${r.amount} € — monatlich ab ${r.next_due}</div>
+                <div class="budget-info">${r.description || "—"}</div>
+                <div class="budget-nums">${r.category} · ${r.amount} € — monatlich ab ${r.next_due}</div>
             </div>
             <button class="delete-btn" onclick="deleteRecurring(${r.id})">✕</button>
         `;
