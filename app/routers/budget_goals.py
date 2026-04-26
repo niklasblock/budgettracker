@@ -10,6 +10,7 @@ class BudgetGoalCreate(BaseModel):
     """BudgetGoalCreate"""
     category: str
     limit: float 
+    goal_type: str = "limit"
 
 router = APIRouter()
 
@@ -66,19 +67,18 @@ def get_budget_goal_summary(db: Session = Depends(get_db)):
     goals = db.query(BudgetGoal).all() 
 
     result = []
-    for goal in goals: 
-        # Ausgaben für diese Kategorie summieren 
-        spent = db.query(func.sum(Transaction.amount))\
+    for goal in goals:
+        total = db.query(func.sum(Transaction.amount))\
                     .filter(Transaction.category == goal.category)\
-                    .filter(Transaction.type == "expense")\
                     .filter(Transaction.status == "paid")\
                     .scalar() or 0.0
-        
+
         result.append({
-            "category": goal.category, 
-            "limit": goal.limit, 
-            "spent": spent, 
-            "remaining": goal.limit - spent 
+            "category": goal.category,
+            "limit": goal.limit,
+            "spent": total,
+            "remaining": goal.limit - total,
+            "goal_type": goal.goal_type
         })
 
     return result

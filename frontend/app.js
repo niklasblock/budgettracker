@@ -112,10 +112,11 @@ async function loadBudgetGoals() {
         data.forEach(goal => {
             const row = document.createElement("div");
             row.className = "budget-row";
+            const typeLabel = goal.goal_type === "target" ? "Ziel" : "Limit";
             row.innerHTML = `
                 <div>
                     <div class="budget-info">${goal.category}</div>
-                    <div class="budget-nums">Limit: ${goal.limit} €</div>
+                    <div class="budget-nums">${typeLabel}: ${goal.limit} €</div>
                 </div>
                 <button class="delete-btn" onclick="deleteBudgetGoals(${goal.id})">✕</button>
             `;
@@ -139,27 +140,48 @@ async function loadBudgetSummary() {
         const data = await response.json(); 
         const container = document.getElementById("budget-summary-body");
         container.innerHTML = "";
-        data.forEach(item => {
-            const percent = item.limit > 0 ? Math.min((item.spent / item.limit) * 100, 100) : 0;
-            const fillClass = percent >= 100 ? "progress-over" : percent >= 80 ? "progress-warn" : "progress-ok";
-            const row = document.createElement("div");
-            row.className = "budget-row";
-            row.innerHTML = `
-                <div style="flex:1">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div class="budget-info">${item.category}</div>
-                        <div class="budget-nums">${item.spent} € / ${item.limit} €</div>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill ${fillClass}" style="width:${percent}%"></div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(row);
-        });
+
+        const limits = data.filter(d => d.goal_type !== "target");
+        const targets = data.filter(d => d.goal_type === "target");
+
+        if (limits.length > 0) {
+            container.innerHTML += `<div style="font-size:11px; font-weight:500; color:#666; margin-bottom:8px;">LIMITS</div>`;
+            limits.forEach(item => renderBudgetRow(item, container));
+        }
+
+        if (targets.length > 0) {
+            container.innerHTML += `<div style="font-size:11px; font-weight:500; color:#666; margin-top:12px; margin-bottom:8px;">ZIELE</div>`;
+            targets.forEach(item => renderBudgetRow(item, container));
+        }
+
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error);
     }
+}
+
+function renderBudgetRow(item, container) {
+    const percent = item.limit > 0 ? Math.min((item.spent / item.limit) * 100, 100) : 0;
+    const fillClass = item.goal_type === "target"
+        ? (percent >= 100 ? "progress-ok" : percent >= 50 ? "progress-warn" : "progress-over")
+        : (percent >= 100 ? "progress-over" : percent >= 80 ? "progress-warn" : "progress-ok");
+    const label = item.goal_type === "target"
+        ? `erreicht: ${item.spent.toFixed(2)} € / Ziel: ${item.limit} €`
+        : `${item.spent.toFixed(2)} € / ${item.limit} €`;
+
+    const row = document.createElement("div");
+    row.className = "budget-row";
+    row.innerHTML = `
+        <div style="flex:1">
+            <div style="display:flex; justify-content:space-between;">
+                <div class="budget-info">${item.category}</div>
+                <div class="budget-nums">${label}</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill ${fillClass}" style="width:${percent}%"></div>
+            </div>
+        </div>
+    `;
+    container.appendChild(row);
 }
 
 // --- Category 
@@ -411,8 +433,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const budgetGoal = {
             category: formData.get("category"),
-            limit: parseFloat(formData.get("limit"))
+            limit: parseFloat(formData.get("limit")),
+            goal_type: formData.get("goal_type")  
         };
+        console.log(budgetGoal);  // NEU
 
         if (!budgetGoal.category || !budgetGoal.limit) {
             document.getElementById("budget-goal-error").style.display = "block";

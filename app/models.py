@@ -24,6 +24,7 @@ class BudgetGoal(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     category: Mapped[str] = mapped_column(String)
     limit: Mapped[float] = mapped_column(Float)
+    goal_type: Mapped[str] = mapped_column(String, default="limit")  # "limit" oder "target"
 
 
 class Category(Base):
