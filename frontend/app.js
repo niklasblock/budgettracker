@@ -1,8 +1,9 @@
 // --- TRANSACTIONS 
 async function loadTransactions(){
     try {
-        const month = document.getElementById("month-filter").value;
-        const response = await fetch(`/transactions?month=${month}`);
+        const month = document.getElementById("month-select").value;
+        const year = document.getElementById("year-select").value;
+        const response = await fetch(`/transactions?month=${year}-${month}`);
         const data = await response.json(); 
         
         const tbody = document.getElementById("transaction-body");
@@ -347,9 +348,37 @@ if (localStorage.getItem("dark") === "true") {
 // --- Event Listener 
 document.addEventListener("DOMContentLoaded", () => {
 
+    const monthSelect = document.getElementById("month-select");
+    const yearSelect = document.getElementById("year-select");
+
+    const months = [
+        "Januar", "Februar", "März", "April", "Mai", "Juni",
+        "Juli", "August", "September", "Oktober", "November", "Dezember"
+    ];
+
+    months.forEach((m, i) => {
+        const option = document.createElement("option");
+        option.value = String(i + 1).padStart(2, "0");
+        option.textContent = m;
+        monthSelect.appendChild(option);
+    });
+
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= currentYear - 3; y--) {
+        const option = document.createElement("option");
+        option.value = y;
+        option.textContent = y;
+        yearSelect.appendChild(option);
+    }
+
+    // Aktuellen Monat und Jahr setzen
     const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    document.getElementById("month-filter").value = currentMonth;
+    monthSelect.value = String(now.getMonth() + 1).padStart(2, "0");
+    yearSelect.value = now.getFullYear();
+
+    // Event Listener
+    monthSelect.addEventListener("change", loadTransactions);
+    yearSelect.addEventListener("change", loadTransactions);
 
     loadTransactions();
     loadBudgetGoals(); 

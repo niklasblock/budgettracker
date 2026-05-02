@@ -99,9 +99,13 @@
         </div>
 
         <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <div style="display:flex; gap:8px; align-items:center;">
                 <h2 style="margin-bottom:0;">Transaktionen</h2>
-                <input type="month" id="month-filter">
+                <div style="display:flex; gap:4px;">
+                    <select id="month-select"></select>
+                    <select id="year-select"></select>
+                </div>
+            </div>
             </div>
             <table id="transaction-table">
                 <thead>
