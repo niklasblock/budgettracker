@@ -8,23 +8,30 @@ Budget Tracker with Web Interface
 git clone https://github.com/niklasblock/budgettracker.git
 cd budgettracker
 pip install -e .
-uvicorn app.main:app --reload
 ```
 
-## macOS App
-To launch the app with a double-click, create the app bundle:
+## Run
 
 ```bash
-mkdir -p BudgetTracker.app/Contents/MacOS
-cp launch.sh BudgetTracker.app/Contents/MacOS/launch
-chmod +x BudgetTracker.app/Contents/MacOS/launch
+# Als Desktop App (empfohlen)
+python start.py
+
+# Als Browser App
+uvicorn app.main:app --reload
+# dann http://127.0.0.1:8000/static/index.html öffnen
 ```
 
-Then create `BudgetTracker.app/Contents/Info.plist` with the contents from the repository.
+## Build als .app (macOS)
 
-## Usage
-Open your browser and navigate to:
-http://127.0.0.1:8000/static/index.html
+```bash
+pyinstaller --windowed --name "BudgetTracker" \
+  --add-data "frontend:frontend" \
+  --add-data "config.yaml:." \
+  --hidden-import "webview" \
+  --hidden-import "webview.platforms.cocoa" \
+  --icon icon.icns \
+  start.py
+```
 
 
 ## Features
