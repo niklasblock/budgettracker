@@ -218,3 +218,6 @@ __marimo__/
 # 
 .DS_Store
 BudgetTracker.app/
+
+# Icons
+icon.iconset/ 
