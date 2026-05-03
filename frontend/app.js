@@ -522,9 +522,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("POST Fehler:", error);
         }
     });
-    document.getElementById("month-filter").addEventListener("change", () => {
-        loadTransactions();
-    });
     document.getElementById("recurring-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);

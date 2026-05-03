@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.database import engine, Base
 from app import models 
+import sys 
+from pathlib import Path 
 from app.routers import transactions, budget_goals, categories, recurring
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -15,7 +17,14 @@ app.include_router(categories.router)
 app.include_router(recurring.router)
 
 #Frontend-Dateien ausliefern 
-app.mount("/static", StaticFiles(directory="frontend"), name="static") 
+def get_frontend_path() -> str:
+    """Get frontend directory path for PyInstaller and development"""
+    if getattr(sys, 'frozen', False):
+        return str(Path(sys._MEIPASS) / "frontend")
+    else:
+        return "frontend"
+
+app.mount("/static", StaticFiles(directory=get_frontend_path()), name="static") 
 
 @app.get("/")
 def root(): 
