@@ -58,9 +58,12 @@ def get_transaction(month: str | None = None, db: Session = Depends(get_db)):
         return db.query(Transaction)\
                     .filter(extract("year", Transaction.date) == int(year))\
                     .filter(extract("month", Transaction.date) == int(mon))\
+                    .order_by(Transaction.date.asc())\
                     .all()
     else: 
-        return db.query(Transaction).all() 
+        return db.query(Transaction)\
+                    .order_by(Transaction.date.asc())\
+                    .all()
 
 @router.get("/transactions/summary")
 def get_transaction_summary(db: Session = Depends(get_db)):
