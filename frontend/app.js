@@ -73,7 +73,8 @@ async function deleteTransaction(id) {
 }
 
 async function loadSummary() {
-    const response = await fetch("/transactions/summary"); 
+    const month = getCurrentMonth(); 
+    const response = await fetch(`/transactions/summary?month=${month}`);
     const data = await response.json(); 
 
     document.getElementById("summary-income").textContent = data.income.toFixed(2) + " €";
@@ -161,7 +162,8 @@ async function deleteBudgetGoals(id) {
 
 async function loadBudgetSummary() {
     try {
-        const response = await fetch("/budget_goal/summary"); 
+        const month = getCurrentMonth();
+        const response = await fetch(`/budget_goal/summary?month=${month}`);
         const data = await response.json(); 
         const container = document.getElementById("budget-summary-body");
         container.innerHTML = "";
@@ -214,7 +216,8 @@ function renderBudgetRow(item, container) {
 let categoryChart = null;
 
 async function loadCategoryChart() {
-    const response = await fetch("/transactions/by-category");
+    const month = getCurrentMonth(); 
+    const response = await fetch(`/transactions/by-category?month=${month}`);
     const data = await response.json();
 
     const labels = data.map(d => d.category);
@@ -329,6 +332,12 @@ function showPage(page, btn = null) {
     } else if (event && event.target) {
         event.target.classList.add("active");
     }
+}
+
+//Get current Month 
+function getCurrentMonth() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
 // --- Dark Mode

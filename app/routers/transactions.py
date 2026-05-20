@@ -66,18 +66,29 @@ def get_transaction(month: str | None = None, db: Session = Depends(get_db)):
                     .all()
 
 @router.get("/transactions/summary")
-def get_transaction_summary(db: Session = Depends(get_db)):
+def get_transaction_summary(db: Session = Depends(get_db), month: str | None = None):
     """Return summary of all transactions"""
-    income = db.query(func.sum(Transaction.amount))\
-            .filter(Transaction.type == "income")\
-            .filter(Transaction.status == "paid")\
-            .scalar() or 0.0
     
-    expenses = db.query(func.sum(Transaction.amount))\
-                 .filter(Transaction.type == "expense")\
-                 .filter(Transaction.status == "paid")\
-                 .scalar() or 0.0
+    query_income = db.query(func.sum(Transaction.amount))\
+                    .filter(Transaction.type == "income")\
+                    .filter(Transaction.status == "paid")
     
+    query_expenses = db.query(func.sum(Transaction.amount))\
+                    .filter(Transaction.type == "expense")\
+                    .filter(Transaction.status == "paid")
+    
+    if month:
+        year, mon = month.split("-")
+        query_income = query_income\
+                    .filter(extract("year", Transaction.date) == int(year))\
+                    .filter(extract("month", Transaction.date) == int(mon))
+        query_expenses = query_expenses\
+                    .filter(extract("year", Transaction.date) == int(year))\
+                    .filter(extract("month", Transaction.date) == int(mon))
+
+    income = query_income.scalar() or 0.0
+    expenses = query_expenses.scalar() or 0.0
+
     return {
         "income": income,
         "expenses": expenses,

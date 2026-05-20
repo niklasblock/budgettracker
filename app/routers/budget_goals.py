@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func 
+from sqlalchemy import func, extract
 from app.database import SessionLocal
 from app.models import Transaction
 from app.models import BudgetGoal
@@ -62,16 +62,25 @@ def delete_budgetgoal(budget_goal_id: int, db: Session = Depends(get_db)):
     return {"message": "deleted"}
 
 @router.get("/budget_goal/summary")
-def get_budget_goal_summary(db: Session = Depends(get_db)): 
+def get_budget_goal_summary(db: Session = Depends(get_db), month: str | None = None): 
     """Return spending vs limit per category"""
     goals = db.query(BudgetGoal).all() 
 
     result = []
     for goal in goals:
-        total = db.query(func.sum(Transaction.amount))\
-                    .filter(Transaction.category == goal.category)\
-                    .filter(Transaction.status == "paid")\
-                    .scalar() or 0.0
+        if month: 
+            year, mon = month.split("-")
+            total = db.query(func.sum(Transaction.amount))\
+                        .filter(Transaction.category == goal.category)\
+                        .filter(Transaction.status == "paid")\
+                        .filter(extract("year", Transaction.date) == int(year))\
+                        .filter(extract("month", Transaction.date) == int(mon))\
+                        .scalar() or 0.0
+        else: 
+            total = db.query(func.sum(Transaction.amount))\
+                        .filter(Transaction.category == goal.category)\
+                        .filter(Transaction.status == "paid")\
+                        .scalar() or 0.0
 
         result.append({
             "category": goal.category,
@@ -84,13 +93,21 @@ def get_budget_goal_summary(db: Session = Depends(get_db)):
     return result
 
 @router.get("/transactions/by-category")
-def get_by_category(db: Session = Depends(get_db)): 
+def get_by_category(db: Session = Depends(get_db), month: str | None = None): 
     """Return total expesses grouped by category"""
-    results = db.query(
-        Transaction.category, 
-        func.sum(Transaction.amount)
-    ).filter(
-        Transaction.type == "expense"
-    ).group_by(Transaction.category).all()
+    if month: 
+         year, mon = month.split("-")
+         results = db.query(Transaction.category, func.sum(Transaction.amount))\
+            .filter(Transaction.type == "expense")\
+            .filter(extract("year", Transaction.date) == int(year))\
+            .filter(extract("month", Transaction.date) == int(mon))\
+            .group_by(Transaction.category).all()
+    else: 
+        results = db.query(
+            Transaction.category, 
+            func.sum(Transaction.amount)
+        ).filter(
+            Transaction.type == "expense"
+        ).group_by(Transaction.category).all()
 
     return [{"category": r[0], "total": r[1]} for r in results]
