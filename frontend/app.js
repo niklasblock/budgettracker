@@ -1,3 +1,35 @@
+// --- TOAST
+function showToast(message, type = "success") {
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add("show"));
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 200);
+    }, 3000);
+}
+
+// --- CONFIRM
+let confirmCallback = null;
+
+function showConfirm(message, onConfirm) {
+    document.getElementById("confirm-message").textContent = message;
+    document.getElementById("confirm-modal").classList.add("open");
+    confirmCallback = onConfirm;
+    document.getElementById("confirm-ok").onclick = () => {
+        closeConfirm();
+        onConfirm();
+    };
+}
+
+function closeConfirm() {
+    document.getElementById("confirm-modal").classList.remove("open");
+    confirmCallback = null;
+}
+
 // --- TRANSACTIONS 
 async function loadTransactions(){
     try {
@@ -64,12 +96,19 @@ function closeEditModal() {
 }
 
 async function deleteTransaction(id) {
-    await fetch(`/transactions/${id}`, {method: "DELETE"});
-    document.getElementById("transaction-body").innerHTML = "";
-    loadTransactions();
-    loadSummary(); 
-    loadCategoryChart();
-    loadYearlyChart(); 
+    showConfirm("Transaktion wirklich löschen?", async () => {
+        try {
+            const response = await fetch(`/transactions/${id}`, {method: "DELETE"});
+            if (!response.ok) throw new Error();
+            showToast("Transaktion gelöscht");
+            loadTransactions();
+            loadSummary();
+            loadCategoryChart();
+            loadYearlyChart();
+        } catch {
+            showToast("Fehler beim Löschen", "error");
+        }
+    });
 }
 
 async function loadSummary() {
@@ -154,10 +193,17 @@ async function loadBudgetGoals() {
 }
 
 async function deleteBudgetGoals(id) {
-    await fetch(`/budget_goal/${id}`, {method: "DELETE"}); 
-    document.getElementById("budget-goal-body").innerHTML = ""; 
-    loadBudgetGoals(); 
-    loadBudgetSummary(); 
+    showConfirm("Budget-Ziel wirklich löschen?", async () => {
+        try {
+            const response = await fetch(`/budget_goal/${id}`, {method: "DELETE"});
+            if (!response.ok) throw new Error();
+            showToast("Budget-Ziel gelöscht");
+            loadBudgetGoals();
+            loadBudgetSummary();
+        } catch {
+            showToast("Fehler beim Löschen", "error");
+        }
+    });
 }
 
 async function loadBudgetSummary() {
@@ -289,9 +335,17 @@ async function loadCategoryList() {
 }
 
 async function deleteCategory(id) {
-    await fetch(`/categories/${id}`, {method: "DELETE"});
-    loadCategoryList();
-    loadCategories();
+    showConfirm("Kategorie wirklich löschen?", async () => {
+        try {
+            const response = await fetch(`/categories/${id}`, {method: "DELETE"});
+            if (!response.ok) throw new Error();
+            showToast("Kategorie gelöscht");
+            loadCategoryList();
+            loadCategories();
+        } catch {
+            showToast("Fehler beim Löschen", "error");
+        }
+    });
 }
 
 let allUpcomingRecurring = [];
@@ -404,8 +458,17 @@ function renderRecurringList(interval) {
 }
 
 async function deleteRecurring(id) {
-    await fetch(`/recurring/${id}`, {method: "DELETE"}); 
-    loadRecurring(); 
+    showConfirm("Dauerauftrag wirklich löschen?", async () => {
+        try {
+            const response = await fetch(`/recurring/${id}`, {method: "DELETE"});
+            if (!response.ok) throw new Error();
+            showToast("Dauerauftrag gelöscht");
+            loadRecurring();
+            loadUpcomingRecurring();
+        } catch {
+            showToast("Fehler beim Löschen", "error");
+        }
+    });
 }
 
 // --- Show Page 
@@ -524,6 +587,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify(transaction)
                 });
                 if (!response.ok) throw new Error("Fehler beim Speichern");
+                showToast("Transaktion hinzugefügt");
             }
 
             e.target.reset();
@@ -533,9 +597,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
             console.error("POST Fehler:", error);
+            showToast("Fehler beim Speichern", "error");
         }
     });
-    
+
     document.getElementById("category-form").addEventListener("submit", async (e) => {
         e.preventDefault(); 
 
@@ -568,18 +633,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error("Fehler beim Speichern");
             }
 
-            // Formular leeren
+            showToast("Kategorie hinzugefügt");
             e.target.reset();
-
             document.getElementById("category-list").innerHTML = ""; 
             loadCategories();
             loadCategoryList(); 
 
-
-
-
         } catch (error) {
             console.error("POST Fehler:", error);
+            showToast("Fehler beim Speichern", "error");
         }
 
     });
@@ -610,6 +672,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!response.ok) throw new Error("Fehler beim Speichern");
 
+            showToast("Budget-Ziel hinzugefügt");
             e.target.reset();
             document.getElementById("budget-goal-body").innerHTML = "";
             loadBudgetGoals();
@@ -617,6 +680,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
             console.error("POST Fehler:", error);
+            showToast("Fehler beim Speichern", "error");
         }
     });
     document.getElementById("recurring-form").addEventListener("submit", async (e) => {
@@ -633,15 +697,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!recurring.amount || !recurring.category || !recurring.next_due) return;
 
-        await fetch("/recurring", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(recurring)
-        });
-
-        e.target.reset();
-        loadRecurring();
-        loadCategories();
+        try {
+            const response = await fetch("/recurring", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(recurring)
+            });
+            if (!response.ok) throw new Error();
+            showToast("Dauerauftrag hinzugefügt");
+            e.target.reset();
+            loadRecurring();
+            loadUpcomingRecurring();
+        } catch {
+            showToast("Fehler beim Speichern", "error");
+        }
     });
     document.getElementById("edit-form").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -662,6 +731,7 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify(transaction)
         });
 
+        showToast("Transaktion gespeichert");
         closeEditModal();
         loadTransactions();
     });
