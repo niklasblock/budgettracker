@@ -53,6 +53,13 @@
         </div>
 
         <div class="card">
+            <h2>Daueraufträge diesen Monat</h2>
+            <div id="upcoming-recurring-body">
+                <p style="font-size:13px; color:#666;">Wird geladen…</p>
+            </div>
+        </div>
+
+        <div class="card">
             <h2>Jahresübersicht</h2>
             <canvas id="yearly-chart"></canvas>
         </div>
@@ -200,6 +207,15 @@
                         <label for="rec-next-due">Nächste Ausführung</label>
                         <input type="date" id="rec-next-due" name="next_due">
                     </div>
+                    <div class="form-group">
+                        <label for="rec-interval">Intervall</label>
+                        <select id="rec-interval" name="interval">
+                            <option value="monthly">Monatlich</option>
+                            <option value="weekly">Wöchentlich</option>
+                            <option value="quarterly">Quartalsweise</option>
+                            <option value="yearly">Jährlich</option>
+                        </select>
+                    </div>
                     <div class="form-group full">
                         <label for="rec-description">Beschreibung</label>
                         <input type="text" id="rec-description" name="description">
@@ -207,7 +223,14 @@
                 </div>
                 <button type="submit">Hinzufügen</button>
             </form>
-            <div id="recurring-list" style="margin-top: 1rem;"></div>
+            <div style="display:flex; gap:4px; margin-top:1rem; margin-bottom:0.5rem;" id="recurring-filter-tabs">
+                <button class="nav-btn active" onclick="filterRecurring('all', this)">Alle</button>
+                <button class="nav-btn" onclick="filterRecurring('monthly', this)">Monatlich</button>
+                <button class="nav-btn" onclick="filterRecurring('weekly', this)">Wöchentlich</button>
+                <button class="nav-btn" onclick="filterRecurring('quarterly', this)">Quartal</button>
+                <button class="nav-btn" onclick="filterRecurring('yearly', this)">Jährlich</button>
+            </div>
+            <div id="recurring-list"></div>
         </div>
     </div>
 

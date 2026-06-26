@@ -294,21 +294,108 @@ async function deleteCategory(id) {
     loadCategories();
 }
 
-// --- Recurring
+let allUpcomingRecurring = [];
+
+async function loadUpcomingRecurring() {
+    try {
+        const response = await fetch("/recurring/upcoming");
+        allUpcomingRecurring = await response.json();
+
+        const container = document.getElementById("upcoming-recurring-body");
+        container.innerHTML = "";
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const inWindow = allUpcomingRecurring.filter(r => r.in_window);
+
+        if (inWindow.length === 0) {
+            container.innerHTML = `<p style="font-size:13px; color:#666;">Keine Daueraufträge in diesem Zeitraum.</p>`;
+            return;
+        }
+
+        const table = document.createElement("table");
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Fällig</th>
+                    <th>Beschreibung</th>
+                    <th>Kategorie</th>
+                    <th>Intervall</th>
+                    <th>Typ</th>
+                    <th>Betrag</th>
+                </tr>
+            </thead>
+        `;
+        const tbody = document.createElement("tbody");
+
+        inWindow.forEach(r => {
+            const dueDate = new Date(r.next_due);
+            const isPast = dueDate < today;
+            const badgeClass = r.type === "income" ? "badge-income" : "badge-expense";
+            const badgeLabel = r.type === "income" ? "Einnahme" : "Ausgabe";
+            const dateStyle = isPast ? "color:#a32d2d;" : "";
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td style="${dateStyle}">${r.next_due}</td>
+                <td style="color:#666">${r.description || "—"}</td>
+                <td>${r.category}</td>
+                <td style="color:#888; font-size:12px;">${INTERVAL_LABELS[r.interval] || r.interval}</td>
+                <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
+                <td>${r.amount.toFixed(2)} €</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        container.appendChild(table);
+    } catch (error) {
+        console.error("Fehler beim Laden der Daueraufträge:", error);
+    }
+}
+
+function filterRecurring(interval, btn) {
+    document.querySelectorAll("#recurring-filter-tabs .nav-btn").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    renderRecurringList(interval);
+}
+
+const INTERVAL_LABELS = {
+    weekly: "Wöchentlich",
+    monthly: "Monatlich",
+    quarterly: "Quartalsweise",
+    yearly: "Jährlich"
+};
+
+let allRecurring = [];
+
 async function loadRecurring() {
     const response = await fetch("/recurring"); 
-    const data = await response.json(); 
+    allRecurring = await response.json(); 
+    renderRecurringList("all");
+}
 
+function renderRecurringList(interval) {
     const container = document.getElementById("recurring-list"); 
     container.innerHTML = ""; 
 
-    data.forEach(r => {
+    const filtered = interval === "all"
+        ? allRecurring
+        : allRecurring.filter(r => r.interval === interval);
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<p style="font-size:13px; color:#666; margin-top:8px;">Keine Daueraufträge gefunden.</p>`;
+        return;
+    }
+
+    filtered.forEach(r => {
         const row = document.createElement("div");
         row.className = "budget-row";
         row.innerHTML = `
             <div>
                 <div class="budget-info">${r.description || "—"}</div>
-                <div class="budget-nums">${r.category} · ${r.amount} € — monatlich ab ${r.next_due}</div>
+                <div class="budget-nums">${r.category} · ${r.amount} € · ${INTERVAL_LABELS[r.interval] || r.interval} · nächste Ausführung: ${r.next_due}</div>
             </div>
             <button class="delete-btn" onclick="deleteRecurring(${r.id})">✕</button>
         `;
@@ -398,6 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadCategoryList(); 
     loadYearlyChart(); 
     loadRecurring(); 
+    loadUpcomingRecurring();
 
     document.querySelector("form").addEventListener("submit", async (e) => {
         e.preventDefault(); // verhindert Reload
@@ -539,7 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
             type: formData.get("type"),
             category: formData.get("category"),
             description: formData.get("description"),
-            interval: "monthly",
+            interval: formData.get("interval"),
             next_due: formData.get("next_due")
         };
 
@@ -577,5 +665,4 @@ document.addEventListener("DOMContentLoaded", () => {
         closeEditModal();
         loadTransactions();
     });
-}); 
-    
+});

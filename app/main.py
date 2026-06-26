@@ -52,7 +52,6 @@ def process_recurring_transactions():
                 .all()
         
         for r in due:
-            # Neue Transaktion erstellen
             transaction = Transaction(
                 amount=r.amount,
                 type=r.type,
@@ -63,8 +62,15 @@ def process_recurring_transactions():
             )
             db.add(transaction)
             
-            # next_due um einen Monat verschieben
-            r.next_due = r.next_due + relativedelta(months=1)
+            # next_due je nach Intervall weitersetzen
+            if r.interval == "weekly":
+                r.next_due = r.next_due + relativedelta(weeks=1)
+            elif r.interval == "quarterly":
+                r.next_due = r.next_due + relativedelta(months=3)
+            elif r.interval == "yearly":
+                r.next_due = r.next_due + relativedelta(years=1)
+            else:  # monthly (default)
+                r.next_due = r.next_due + relativedelta(months=1)
         
         db.commit()
     finally:
