@@ -30,6 +30,17 @@ function closeConfirm() {
     confirmCallback = null;
 }
 
+// --- INLINE ERROR
+function showInlineError(containerId, message = "Fehler beim Laden. Bitte App neu starten.", isRow = false) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (isRow) {
+        container.innerHTML = `<tr><td colspan="99" class="inline-error">⚠ ${message}</td></tr>`;
+    } else {
+        container.innerHTML = `<div class="inline-error">⚠ ${message}</div>`;
+    }
+}
+
 // --- TRANSACTIONS 
 async function loadTransactions(){
     try {
@@ -65,6 +76,7 @@ async function loadTransactions(){
         loadBudgetSummary();
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error);
+        showInlineError("transaction-body", "Transaktionen konnten nicht geladen werden.", true);
     }
 }
 
@@ -189,6 +201,7 @@ async function loadBudgetGoals() {
         });
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error);
+        showInlineError("budget-goal-body");
     }
 }
 
@@ -229,6 +242,7 @@ async function loadBudgetSummary() {
 
     } catch (error) {
         console.error('Fehler beim Aufrufen:', error);
+        showInlineError("budget-summary-body");
     }
 }
 
@@ -299,39 +313,48 @@ async function loadCategoryChart() {
 }
 
 async function loadCategories() {
-    const response = await fetch("/categories");
-    const data = await response.json();
+    try {
+        const response = await fetch("/categories");
+        if (!response.ok) throw new Error();
+        const data = await response.json();
 
-    const selects = ["category", "bg-category", "rec-category", "edit-category"];
-    
-    selects.forEach(id => {
-        const select = document.getElementById(id);
-        select.innerHTML = '<option value="">Kategorie wählen</option>';
-        data.forEach(cat => {
-            const option = document.createElement("option");
-            option.value = cat.name;
-            option.textContent = cat.name;
-            select.appendChild(option);
+        const selects = ["category", "bg-category", "rec-category", "edit-category"];
+        selects.forEach(id => {
+            const select = document.getElementById(id);
+            select.innerHTML = '<option value="">Kategorie wählen</option>';
+            data.forEach(cat => {
+                const option = document.createElement("option");
+                option.value = cat.name;
+                option.textContent = cat.name;
+                select.appendChild(option);
+            });
         });
-    });
+    } catch {
+        showToast("Kategorien konnten nicht geladen werden.", "error");
+    }
 }
 
 async function loadCategoryList() {
-    const response = await fetch("/categories");
-    const data = await response.json();
+    try {
+        const response = await fetch("/categories");
+        if (!response.ok) throw new Error();
+        const data = await response.json();
 
-    const container = document.getElementById("category-list");
-    container.innerHTML = "";
+        const container = document.getElementById("category-list");
+        container.innerHTML = "";
 
-    data.forEach(cat => {
-        const row = document.createElement("div");
-        row.className = "budget-row";
-        row.innerHTML = `
-            <div class="budget-info">${cat.name}</div>
-            <button class="delete-btn" onclick="deleteCategory(${cat.id})">✕</button>
-        `;
-        container.appendChild(row);
-    });
+        data.forEach(cat => {
+            const row = document.createElement("div");
+            row.className = "budget-row";
+            row.innerHTML = `
+                <div class="budget-info">${cat.name}</div>
+                <button class="delete-btn" onclick="deleteCategory(${cat.id})">✕</button>
+            `;
+            container.appendChild(row);
+        });
+    } catch {
+        showInlineError("category-list");
+    }
 }
 
 async function deleteCategory(id) {
@@ -404,11 +427,27 @@ async function loadUpcomingRecurring() {
 
         table.appendChild(tbody);
         container.appendChild(table);
+
+        // Gesamt-Summe
+        const totalExpenses = inWindow
+            .filter(r => r.type === "expense")
+            .reduce((sum, r) => sum + r.amount, 0);
+        const totalIncome = inWindow
+            .filter(r => r.type === "income")
+            .reduce((sum, r) => sum + r.amount, 0);
+
+        const summary = document.createElement("div");
+        summary.style = "display:flex; gap:1.5rem; margin-top:1rem; padding-top:0.75rem; border-top:0.5px solid #e0e0e0; font-size:13px;";
+        summary.innerHTML = `
+            <span>Gesamt Ausgaben: <strong style="color:#a32d2d;">${totalExpenses.toFixed(2)} €</strong></span>
+            ${totalIncome > 0 ? `<span>Gesamt Einnahmen: <strong style="color:#3b6d11;">${totalIncome.toFixed(2)} €</strong></span>` : ""}
+        `;
+        container.appendChild(summary);
     } catch (error) {
         console.error("Fehler beim Laden der Daueraufträge:", error);
+        showInlineError("upcoming-recurring-body");
     }
 }
-
 function filterRecurring(interval, btn) {
     document.querySelectorAll("#recurring-filter-tabs .nav-btn").forEach(b => b.classList.remove("active"));
     if (btn) btn.classList.add("active");
@@ -425,9 +464,14 @@ const INTERVAL_LABELS = {
 let allRecurring = [];
 
 async function loadRecurring() {
-    const response = await fetch("/recurring"); 
-    allRecurring = await response.json(); 
-    renderRecurringList("all");
+    try {
+        const response = await fetch("/recurring"); 
+        if (!response.ok) throw new Error();
+        allRecurring = await response.json(); 
+        renderRecurringList("all");
+    } catch {
+        showInlineError("recurring-list");
+    }
 }
 
 function renderRecurringList(interval) {
