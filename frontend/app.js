@@ -41,6 +41,52 @@ function showInlineError(containerId, message = "Fehler beim Laden. Bitte App ne
     }
 }
 
+// --- Add Modal
+function openAddModal() {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("modal-date").value = today;
+    document.getElementById("add-modal-error").style.display = "none";
+    document.getElementById("add-modal-form").reset();
+    document.getElementById("modal-date").value = today;
+    document.getElementById("add-modal").classList.add("open");
+}
+
+function closeAddModal() {
+    document.getElementById("add-modal").classList.remove("open");
+}
+
+// --- Settings
+async function loadSettings() {
+    try {
+        const response = await fetch("/settings");
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        document.getElementById("db-path-current").textContent = data.db_path;
+        document.getElementById("db-path").placeholder = data.db_path;
+    } catch {
+        showToast("Einstellungen konnten nicht geladen werden.", "error");
+    }
+}
+
+async function saveSettings() {
+    const dbPath = document.getElementById("db-path").value.trim();
+    if (!dbPath) { showToast("Bitte einen Pfad eingeben.", "error"); return; }
+    try {
+        const response = await fetch("/settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ db_path: dbPath })
+        });
+        if (!response.ok) throw new Error();
+        document.getElementById("db-path-current").textContent = dbPath;
+        document.getElementById("db-path").value = "";
+        document.getElementById("db-path").placeholder = dbPath;
+        showToast("Gespeichert – App neu starten um den Pfad zu aktivieren.");
+    } catch {
+        showToast("Fehler beim Speichern.", "error");
+    }
+}
+
 // --- TRANSACTIONS 
 async function loadTransactions(){
     try {
@@ -318,7 +364,7 @@ async function loadCategories() {
         if (!response.ok) throw new Error();
         const data = await response.json();
 
-        const selects = ["category", "bg-category", "rec-category", "edit-category"];
+        const selects = ["category", "bg-category", "rec-category", "edit-category", "modal-category"];
         selects.forEach(id => {
             const select = document.getElementById(id);
             select.innerHTML = '<option value="">Kategorie wählen</option>';
@@ -449,7 +495,7 @@ async function loadUpcomingRecurring() {
     }
 }
 function filterRecurring(interval, btn) {
-    document.querySelectorAll("#recurring-filter-tabs .nav-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll("#recurring-filter-tabs .filter-tab").forEach(b => b.classList.remove("active"));
     if (btn) btn.classList.add("active");
     renderRecurringList(interval);
 }
@@ -516,36 +562,66 @@ async function deleteRecurring(id) {
 }
 
 // --- Show Page 
+const PAGE_TITLES = {
+    dashboard: { title: "Dashboard", sub: "Übersicht" },
+    transaktionen: { title: "Transaktionen", sub: "Einnahmen & Ausgaben" },
+    dauerauftraege: { title: "Daueraufträge", sub: "Verwaltung" },
+    "budget-ziele": { title: "Budget-Ziele", sub: "Verwaltung" },
+    kategorien: { title: "Kategorien", sub: "Verwaltung" },
+    einstellungen: { title: "Einstellungen", sub: "App-Konfiguration" },
+};
+
 function showPage(page, btn = null) {
-    document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-    document.getElementById(page).style.display = "block";
-    
-    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-    if (btn) {
-        btn.classList.add("active");
-    } else if (event && event.target) {
-        event.target.classList.add("active");
-    }
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    const target = document.getElementById(page);
+    if (target) target.classList.add("active");
+
+    document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+
+    const meta = PAGE_TITLES[page] || { title: page, sub: "" };
+    document.getElementById("topbar-title").textContent = meta.title;
+    document.getElementById("topbar-sub").textContent = meta.sub;
+
+    if (page === "einstellungen") loadSettings();
+}
+
+// --- Month state for topbar chip
+let currentMonthDate = new Date();
+
+function updateMonthLabel() {
+    const months = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+    document.getElementById("month-label").textContent =
+        `${months[currentMonthDate.getMonth()]} ${currentMonthDate.getFullYear()}`;
+}
+
+function changeMonth(dir) {
+    currentMonthDate.setMonth(currentMonthDate.getMonth() + dir);
+    updateMonthLabel();
+    // sync selects
+    const m = String(currentMonthDate.getMonth() + 1).padStart(2, "0");
+    const y = currentMonthDate.getFullYear();
+    const ms = document.getElementById("month-select");
+    const ys = document.getElementById("year-select");
+    if (ms) ms.value = m;
+    if (ys) ys.value = y;
+    loadTransactions();
+    loadSummary();
+    loadBudgetSummary();
+    loadCategoryChart();
+    loadUpcomingRecurring();
 }
 
 //Get current Month 
 function getCurrentMonth() {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const m = String(currentMonthDate.getMonth() + 1).padStart(2, "0");
+    return `${currentMonthDate.getFullYear()}-${m}`;
 }
 
 // --- Dark Mode
 function toggleDark() {
     document.documentElement.classList.toggle("dark");
-    const btn = document.getElementById("dark-toggle");
-    btn.textContent = document.documentElement.classList.contains("dark") ? "☀️" : "🌙";
     localStorage.setItem("dark", document.documentElement.classList.contains("dark"));
-}
-
-// Dark Mode beim Start wiederherstellen
-if (localStorage.getItem("dark") === "true") {
-    document.documentElement.classList.add("dark");
-    document.getElementById("dark-toggle").textContent = "☀️";
 }
 
 // --- Event Listener 
@@ -578,6 +654,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const now = new Date();
     monthSelect.value = String(now.getMonth() + 1).padStart(2, "0");
     yearSelect.value = now.getFullYear();
+    updateMonthLabel();
 
     // Event Listener
     monthSelect.addEventListener("change", loadTransactions);
@@ -756,6 +833,40 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast("Fehler beim Speichern", "error");
         }
     });
+    document.getElementById("add-modal-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const transaction = {
+            amount: parseFloat(formData.get("amount")),
+            type: formData.get("type"),
+            category: formData.get("category"),
+            description: formData.get("description"),
+            date: formData.get("date")
+        };
+        if (!transaction.amount || !transaction.category || !transaction.date || !transaction.type) {
+            document.getElementById("add-modal-error").style.display = "block";
+            return;
+        }
+        document.getElementById("add-modal-error").style.display = "none";
+        try {
+            const response = await fetch("/transactions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(transaction)
+            });
+            if (!response.ok) throw new Error();
+            showToast("Transaktion hinzugefügt");
+            closeAddModal();
+            loadTransactions();
+            loadSummary();
+            loadCategoryChart();
+            loadYearlyChart();
+            loadBudgetSummary();
+        } catch {
+            showToast("Fehler beim Speichern", "error");
+        }
+    });
+
     document.getElementById("edit-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);

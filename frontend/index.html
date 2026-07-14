@@ -12,130 +12,253 @@
 </head>
 <body>
 
-    <!-- Navigation -->
-    <nav>
-        <span class="nav-title">Budget Tracker</span>
-        <div class="nav-links">
-            <button class="nav-btn active" onclick="showPage('dashboard', this)">Dashboard</button>
-            <button class="nav-btn" onclick="showPage('transaktionen', this)">Transaktionen</button>
-            <button class="nav-btn" onclick="showPage('verwaltung', this)">Verwaltung</button>
-            <button class="nav-btn" id="dark-toggle" onclick="toggleDark()">🌙</button>
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <svg viewBox="0 0 14 14"><path d="M2 10 L7 3 L12 10 Z"/></svg>
         </div>
-    </nav>
+        <span class="brand-name">Budget</span>
+    </div>
 
-    <!-- Dashboard -->
-    <div id="dashboard" class="page">
-        <!-- Metric Cards -->
-        <div class="metric-grid">
-            <div class="metric">
-                <div class="metric-label">Einnahmen</div>
-                <div class="metric-value income" id="summary-income">—</div>
-            </div>
-            <div class="metric">
-                <div class="metric-label">Ausgaben</div>
-                <div class="metric-value expense" id="summary-expenses">—</div>
-            </div>
-            <div class="metric">
-                <div class="metric-label">Saldo</div>
-                <div class="metric-value" id="summary-balance">—</div>
-            </div>
+    <div class="nav-section">
+        <div class="nav-section-label">Überblick</div>
+        <button class="nav-item active" onclick="showPage('dashboard', this)">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Dashboard
+        </button>
+        <button class="nav-item" onclick="showPage('transaktionen', this)">
+            <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1" fill="currentColor" stroke="none"/></svg>
+            Transaktionen
+        </button>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-section-label">Verwaltung</div>
+        <button class="nav-item" onclick="showPage('dauerauftraege', this)">
+            <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            Daueraufträge
+        </button>
+        <button class="nav-item" onclick="showPage('budget-ziele', this)">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>
+            Budget-Ziele
+        </button>
+        <button class="nav-item" onclick="showPage('kategorien', this)">
+            <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Kategorien
+        </button>
+    </div>
+
+    <div class="sidebar-bottom">
+        <button class="nav-item" onclick="toggleDark()">
+            <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            Dark Mode
+        </button>
+        <button class="nav-item" onclick="showPage('einstellungen', this)">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Einstellungen
+        </button>
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="topbar-title" id="topbar-title">Dashboard</div>
+            <div class="topbar-sub" id="topbar-sub">Übersicht</div>
         </div>
-
-        <div class="two-col">
-            <div class="card">
-                <h2>Budget Übersicht</h2>
-                <div id="budget-summary-body"></div>
+        <div class="topbar-right">
+            <div class="month-chip">
+                <button onclick="changeMonth(-1)">‹</button>
+                <span id="month-label">—</span>
+                <button onclick="changeMonth(1)">›</button>
             </div>
-            <div class="card">
-                <h2>Ausgaben nach Kategorie</h2>
-                <canvas id="category-chart"></canvas>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Daueraufträge diesen Monat</h2>
-            <div id="upcoming-recurring-body">
-                <p style="font-size:13px; color:#666;">Wird geladen…</p>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Jahresübersicht</h2>
-            <canvas id="yearly-chart"></canvas>
+            <button class="btn-add" onclick="openAddModal()">
+                <svg viewBox="0 0 13 13"><line x1="6.5" y1="1" x2="6.5" y2="12"/><line x1="1" y1="6.5" x2="12" y2="6.5"/></svg>
+                Hinzufügen
+            </button>
         </div>
     </div>
 
-    <!-- Transaktionen -->
-    <div id="transaktionen" class="page" style="display:none;">
-        <div class="card">
-            <h2>Transaktion hinzufügen</h2>
-            <form id="transaction-form">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="amount">Betrag</label>
-                        <input type="number" id="amount" name="amount" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="type">Typ</label>
-                        <select name="type" id="type">
-                            <option value="">Typ wählen</option>
-                            <option value="income">Einnahme</option>
-                            <option value="expense">Ausgabe</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="category">Kategorie</label>
-                        <select id="category" name="category">
-                            <option value="">Kategorie wählen</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="date">Datum</label>
-                        <input type="date" id="date" name="date">
-                    </div>
-                    <div class="form-group full">
-                        <label for="description">Beschreibung</label>
-                        <input type="text" id="description" name="description">
-                    </div>
-                </div>
-                <button type="submit">Hinzufügen</button>
-                <p id="transaction-error" style="color:#a32d2d; font-size:12px; margin-top:8px; display:none;">
-                    Bitte alle Pflichtfelder ausfüllen.
-                </p>
-            </form>
-        </div>
+    <div class="page-content">
 
-        <div class="card">
-            <div style="display:flex; gap:8px; align-items:center;">
-                <h2 style="margin-bottom:0;">Transaktionen</h2>
-                <div style="display:flex; gap:4px;">
-                    <select id="month-select"></select>
-                    <select id="year-select"></select>
+        <!-- Dashboard -->
+        <div id="dashboard" class="page active">
+            <div class="kpi-grid">
+                <div class="kpi">
+                    <div class="kpi-label">Einnahmen</div>
+                    <div class="kpi-value income" id="summary-income">—</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Ausgaben</div>
+                    <div class="kpi-value expense" id="summary-expenses">—</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-label">Saldo</div>
+                    <div class="kpi-value" id="summary-balance">—</div>
                 </div>
             </div>
-            </div>
-            <table id="transaction-table">
-                <thead>
-                    <tr>
-                        <th>Datum</th>
-                        <th>Kategorie</th>
-                        <th>Beschreibung</th>
-                        <th>Typ</th>
-                        <th>Betrag</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="transaction-body"></tbody>
-            </table>
-        </div>
-    </div>
 
-    <!-- Verwaltung -->
-    <div id="verwaltung" class="page" style="display:none;">
-        <div class="two-col">
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Budget-Ziele</div>
+                        <div class="card-action" onclick="showPage('budget-ziele', null)">Alle →</div>
+                    </div>
+                    <div id="budget-summary-body"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Ausgaben nach Kategorie</div>
+                    </div>
+                    <canvas id="category-chart"></canvas>
+                </div>
+            </div>
+
             <div class="card">
-                <h2>Budget-Ziele</h2>
+                <div class="card-header">
+                    <div class="card-title">Daueraufträge diesen Monat</div>
+                    <div class="card-action" onclick="showPage('dauerauftraege', null)">Alle →</div>
+                </div>
+                <div id="upcoming-recurring-body"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Jahresübersicht</div>
+                </div>
+                <canvas id="yearly-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Transaktionen -->
+        <div id="transaktionen" class="page">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Transaktion hinzufügen</div></div>
+                <form id="transaction-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="amount">Betrag</label>
+                            <input type="number" id="amount" name="amount" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="type">Typ</label>
+                            <select name="type" id="type">
+                                <option value="">Typ wählen</option>
+                                <option value="income">Einnahme</option>
+                                <option value="expense">Ausgabe</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Kategorie</label>
+                            <select id="category" name="category">
+                                <option value="">Kategorie wählen</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Datum</label>
+                            <input type="date" id="date" name="date">
+                        </div>
+                        <div class="form-group full">
+                            <label for="description">Beschreibung</label>
+                            <input type="text" id="description" name="description">
+                        </div>
+                    </div>
+                    <button type="submit">Hinzufügen</button>
+                    <p id="transaction-error" style="color:var(--expense); font-size:12px; margin-top:8px; display:none;">Bitte alle Pflichtfelder ausfüllen.</p>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Transaktionen</div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <select id="month-select" style="font-size:12px; padding:4px 8px;"></select>
+                        <select id="year-select" style="font-size:12px; padding:4px 8px;"></select>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Kategorie</th>
+                            <th>Beschreibung</th>
+                            <th>Typ</th>
+                            <th>Betrag</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="transaction-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Daueraufträge -->
+        <div id="dauerauftraege" class="page">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Dauerauftrag hinzufügen</div></div>
+                <form id="recurring-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="rec-amount">Betrag</label>
+                            <input type="number" id="rec-amount" name="amount" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-type">Typ</label>
+                            <select id="rec-type" name="type">
+                                <option value="income">Einnahme</option>
+                                <option value="expense">Ausgabe</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-category">Kategorie</label>
+                            <select id="rec-category" name="category">
+                                <option value="">Kategorie wählen</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-interval">Intervall</label>
+                            <select id="rec-interval" name="interval">
+                                <option value="monthly">Monatlich</option>
+                                <option value="weekly">Wöchentlich</option>
+                                <option value="quarterly">Quartalsweise</option>
+                                <option value="yearly">Jährlich</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-next-due">Nächste Ausführung</label>
+                            <input type="date" id="rec-next-due" name="next_due">
+                        </div>
+                        <div class="form-group full">
+                            <label for="rec-description">Beschreibung</label>
+                            <input type="text" id="rec-description" name="description">
+                        </div>
+                    </div>
+                    <button type="submit">Hinzufügen</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-title">Alle Daueraufträge</div></div>
+                <div class="filter-tabs" id="recurring-filter-tabs">
+                    <button class="filter-tab active" onclick="filterRecurring('all', this)">Alle</button>
+                    <button class="filter-tab" onclick="filterRecurring('monthly', this)">Monatlich</button>
+                    <button class="filter-tab" onclick="filterRecurring('weekly', this)">Wöchentlich</button>
+                    <button class="filter-tab" onclick="filterRecurring('quarterly', this)">Quartal</button>
+                    <button class="filter-tab" onclick="filterRecurring('yearly', this)">Jährlich</button>
+                </div>
+                <div id="recurring-list"></div>
+            </div>
+        </div>
+
+        <!-- Budget-Ziele -->
+        <div id="budget-ziele" class="page">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Budget-Ziel hinzufügen</div></div>
                 <form id="budget-goal-form">
                     <div class="form-grid">
                         <div class="form-group">
@@ -145,7 +268,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="limit">Limit</label>
+                            <label for="limit">Betrag</label>
                             <input type="number" id="limit" name="limit" step="0.01">
                         </div>
                         <div class="form-group">
@@ -153,19 +276,23 @@
                             <select id="bg-type" name="goal_type">
                                 <option value="limit">Limit</option>
                                 <option value="target">Ziel</option>
-                                </select>
+                            </select>
                         </div>
                     </div>
                     <button type="submit">Hinzufügen</button>
-                    <p id="budget-goal-error" style="color:#a32d2d; font-size:12px; margin-top:8px; display:none;">
-                        Bitte alle Felder ausfüllen.
-                    </p>
+                    <p id="budget-goal-error" style="color:var(--expense); font-size:12px; margin-top:8px; display:none;">Bitte alle Felder ausfüllen.</p>
                 </form>
-                <div id="budget-goal-body" style="margin-top: 1rem;"></div>
             </div>
-
             <div class="card">
-                <h2>Kategorien</h2>
+                <div class="card-header"><div class="card-title">Übersicht</div></div>
+                <div id="budget-goal-body"></div>
+            </div>
+        </div>
+
+        <!-- Kategorien -->
+        <div id="kategorien" class="page">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Kategorie hinzufügen</div></div>
                 <form id="category-form">
                     <div class="form-grid">
                         <div class="form-group">
@@ -174,118 +301,137 @@
                         </div>
                     </div>
                     <button type="submit">Hinzufügen</button>
-                    <p id="category-error" style="color:#a32d2d; font-size:12px; margin-top:8px; display:none;">
-                        Bitte einen Namen eingeben.
-                    </p>
+                    <p id="category-error" style="color:var(--expense); font-size:12px; margin-top:8px; display:none;">Bitte einen Namen eingeben.</p>
                 </form>
-                <div id="category-list" style="margin-top: 1rem;"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-title">Alle Kategorien</div></div>
+                <div id="category-list"></div>
             </div>
         </div>
 
-        <div class="card">
-            <h2>Daueraufträge</h2>
-            <form id="recurring-form">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="rec-amount">Betrag</label>
-                        <input type="number" id="rec-amount" name="amount" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="rec-type">Typ</label>
-                        <select id="rec-type" name="type">
-                            <option value="income">Einnahme</option>
-                            <option value="expense">Ausgabe</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="rec-category">Kategorie</label>
-                        <select id="rec-category" name="category">
-                            <option value="">Kategorie wählen</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="rec-next-due">Nächste Ausführung</label>
-                        <input type="date" id="rec-next-due" name="next_due">
-                    </div>
-                    <div class="form-group">
-                        <label for="rec-interval">Intervall</label>
-                        <select id="rec-interval" name="interval">
-                            <option value="monthly">Monatlich</option>
-                            <option value="weekly">Wöchentlich</option>
-                            <option value="quarterly">Quartalsweise</option>
-                            <option value="yearly">Jährlich</option>
-                        </select>
-                    </div>
-                    <div class="form-group full">
-                        <label for="rec-description">Beschreibung</label>
-                        <input type="text" id="rec-description" name="description">
-                    </div>
+        <!-- Einstellungen -->
+        <div id="einstellungen" class="page">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Datenbank</div></div>
+
+                <div style="background: var(--surface-2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 1rem;">
+                    <div style="font-size: 11px; color: var(--text-3); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.04em;">Aktueller Speicherort</div>
+                    <div id="db-path-current" style="font-size: 13px; color: var(--text); font-family: monospace;">—</div>
                 </div>
+
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label for="db-path">Neuer Speicherort</label>
+                    <input type="text" id="db-path" name="db_path" placeholder="~/Dokumente/budget.db">
+                </div>
+
+                <div style="background: var(--warn-bg); border: 0.5px solid; border-color: color-mix(in srgb, var(--warn) 30%, transparent); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 1rem; font-size: 12px; color: var(--warn); line-height: 1.6;">
+                    <strong style="font-weight: 500;">Wichtig:</strong> Beim Wechsel des Speicherorts werden deine bisherigen Daten nicht automatisch übertragen.
+                    Wenn du deine Daten behalten möchtest, kopiere die <code style="font-family: monospace; background: color-mix(in srgb, var(--warn) 15%, transparent); padding: 1px 4px; border-radius: 3px;">.db</code>-Datei vom aktuellen Speicherort manuell an den neuen Pfad – erst danach hier speichern.
+                    Nach dem Speichern muss die App neu gestartet werden.
+                </div>
+
+                <button type="button" onclick="saveSettings()">Speichern</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Add Transaction Modal -->
+<div id="add-modal">
+    <div class="edit-box">
+        <h2>Transaktion hinzufügen</h2>
+        <form id="add-modal-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="modal-amount">Betrag</label>
+                    <input type="number" id="modal-amount" name="amount" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="modal-type">Typ</label>
+                    <select id="modal-type" name="type">
+                        <option value="">Typ wählen</option>
+                        <option value="income">Einnahme</option>
+                        <option value="expense">Ausgabe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modal-category">Kategorie</label>
+                    <select id="modal-category" name="category">
+                        <option value="">Kategorie wählen</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modal-date">Datum</label>
+                    <input type="date" id="modal-date" name="date">
+                </div>
+                <div class="form-group full">
+                    <label for="modal-description">Beschreibung</label>
+                    <input type="text" id="modal-description" name="description">
+                </div>
+            </div>
+            <p id="add-modal-error" style="color:var(--expense); font-size:12px; margin-bottom:8px; display:none;">Bitte alle Pflichtfelder ausfüllen.</p>
+            <div style="display:flex; gap:8px;">
                 <button type="submit">Hinzufügen</button>
-            </form>
-            <div style="display:flex; gap:4px; margin-top:1rem; margin-bottom:0.5rem;" id="recurring-filter-tabs">
-                <button class="nav-btn active" onclick="filterRecurring('all', this)">Alle</button>
-                <button class="nav-btn" onclick="filterRecurring('monthly', this)">Monatlich</button>
-                <button class="nav-btn" onclick="filterRecurring('weekly', this)">Wöchentlich</button>
-                <button class="nav-btn" onclick="filterRecurring('quarterly', this)">Quartal</button>
-                <button class="nav-btn" onclick="filterRecurring('yearly', this)">Jährlich</button>
+                <button type="button" class="btn-secondary" onclick="closeAddModal()">Abbrechen</button>
             </div>
-            <div id="recurring-list"></div>
-        </div>
+        </form>
     </div>
-
-    <!-- Edit Modal -->
-    <div id="edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center;">
-        <div class="card" style="width:500px; margin:0;">
-            <h2>Transaktion bearbeiten</h2>
-            <form id="edit-form">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="edit-amount">Betrag</label>
-                        <input type="number" id="edit-amount" name="amount" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-type">Typ</label>
-                        <select id="edit-type" name="type">
-                            <option value="income">Einnahme</option>
-                            <option value="expense">Ausgabe</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-category">Kategorie</label>
-                        <select id="edit-category" name="category">
-                            <option value="">Kategorie wählen</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-date">Datum</label>
-                        <input type="date" id="edit-date" name="date">
-                    </div>
-                    <div class="form-group full">
-                        <label for="edit-description">Beschreibung</label>
-                        <input type="text" id="edit-description" name="description">
-                    </div>
+</div>
+<div id="edit-modal">
+    <div class="edit-box">
+        <h2>Transaktion bearbeiten</h2>
+        <form id="edit-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="edit-amount">Betrag</label>
+                    <input type="number" id="edit-amount" name="amount" step="0.01">
                 </div>
-                <div style="display:flex; gap:8px; margin-top:8px;">
-                    <button type="submit">Speichern</button>
-                    <button type="button" class="btn-secondary" onclick="closeEditModal()">Abbrechen</button>
+                <div class="form-group">
+                    <label for="edit-type">Typ</label>
+                    <select id="edit-type" name="type">
+                        <option value="income">Einnahme</option>
+                        <option value="expense">Ausgabe</option>
+                    </select>
                 </div>
-            </form>
-        </div>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-    <script src="/static/app.js"></script>
-
-    <div id="toast-container"></div>
-
-    <div id="confirm-modal">
-        <div class="confirm-box">
-            <p id="confirm-message">Wirklich löschen?</p>
-            <div class="confirm-actions">
-                <button class="btn-secondary" onclick="closeConfirm()">Abbrechen</button>
-                <button class="confirm-delete-btn" id="confirm-ok">Löschen</button>
+                <div class="form-group">
+                    <label for="edit-category">Kategorie</label>
+                    <select id="edit-category" name="category">
+                        <option value="">Kategorie wählen</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-date">Datum</label>
+                    <input type="date" id="edit-date" name="date">
+                </div>
+                <div class="form-group full">
+                    <label for="edit-description">Beschreibung</label>
+                    <input type="text" id="edit-description" name="description">
+                </div>
             </div>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <button type="submit">Speichern</button>
+                <button type="button" class="btn-secondary" onclick="closeEditModal()">Abbrechen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast & Confirm -->
+<div id="toast-container"></div>
+
+<div id="confirm-modal">
+    <div class="confirm-box">
+        <p id="confirm-message">Wirklich löschen?</p>
+        <div class="confirm-actions">
+            <button class="btn-secondary" onclick="closeConfirm()">Abbrechen</button>
+            <button class="confirm-delete-btn" id="confirm-ok">Löschen</button>
         </div>
     </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="/static/app.js"></script>
 </body>
 </html>
