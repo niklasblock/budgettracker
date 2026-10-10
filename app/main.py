@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from app.database import engine, Base, get_config_path
+from app.database import engine, Base, get_config_path, get_db_path
 from app import models 
 import sys 
 import yaml
@@ -44,7 +44,7 @@ def get_settings():
     """Return current settings"""
     with open(get_config_path()) as f:
         config = yaml.safe_load(f)
-    return {"db_path": config["database"]["path"]}
+    return {"db_path": str(get_db_path())}
 
 @app.put("/settings")
 def update_settings(data: SettingsUpdate):
@@ -54,7 +54,7 @@ def update_settings(data: SettingsUpdate):
         config = yaml.safe_load(f)
     config["database"]["path"] = data.db_path
     with open(config_path, "w") as f:
-        yaml.dump(config, f)
+        yaml.safe_dump(config, f, allow_unicode=True, sort_keys=False)
     return {"db_path": data.db_path, "message": "Gespeichert. Bitte App neu starten."}
 
 @app.on_event("startup")

@@ -1,3 +1,5 @@
+import os
+import shutil
 import yaml
 import sys 
 from pathlib import Path 
@@ -5,16 +7,34 @@ from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 
-def get_config_path() -> Path:
-    """Get config.yaml path - works both in development and PyInstaller bundle"""
+USER_CONFIG_DIR = Path.home() / ".budgettracker"
+USER_CONFIG_PATH = USER_CONFIG_DIR / "config.yaml"
+
+
+def get_default_config_path() -> Path:
+    """Default config shipped with the code / app bundle (read-only template)"""
     if getattr(sys, 'frozen', False):
         return Path(sys._MEIPASS) / "config.yaml"
-    else:
-        return Path(__file__).parent.parent / "config.yaml"
+    return Path(__file__).parent.parent / "config.yaml"
+
+
+def get_config_path() -> Path:
+    """Path of the user config (~/.budgettracker/config.yaml).
+
+    Lives outside the app bundle so settings survive rebuilds.
+    On first start it is created from the default config.
+    """
+    if not USER_CONFIG_PATH.exists():
+        USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(get_default_config_path(), USER_CONFIG_PATH)
+    return USER_CONFIG_PATH
 
 
 def get_db_path() -> Path:
-    """Read database path from config.yaml"""
+    """Database path. BUDGETTRACKER_DB overrides the config (handy for testing)."""
+    override = os.environ.get("BUDGETTRACKER_DB")
+    if override:
+        return Path(override).expanduser()
     with open(get_config_path()) as f:
         config = yaml.safe_load(f)
     return Path(config["database"]["path"]).expanduser()

@@ -93,7 +93,9 @@ async function loadTransactions(){
         const month = document.getElementById("month-select").value;
         const year = document.getElementById("year-select").value;
         const response = await fetch(`/transactions?month=${year}-${month}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json(); 
+        transactionsById = Object.fromEntries(data.map(t => [t.id, t]));
         
         const tbody = document.getElementById("transaction-body");
         tbody.innerHTML = "";
@@ -106,12 +108,12 @@ async function loadTransactions(){
                 : `<button class="status-btn paid" onclick="toggleStatus(${transaction.id})">✓</button>`;
             row.innerHTML = `
                 <td>${transaction.date}</td>
-                <td>${transaction.category}</td>
-                <td style="color:#666">${transaction.description || "—"}</td>
+                <td>${escapeHtml(transaction.category)}</td>
+                <td style="color:#666">${escapeHtml(transaction.description) || "—"}</td>
                 <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
                 <td>${transaction.amount} €</td>
                 <td>${statusBtn}</td>
-                <td><button class="delete-btn" onclick="editTransaction(${transaction.id}, ${transaction.amount}, '${transaction.type}', '${transaction.category}', '${transaction.description || ""}', '${transaction.date}', '${transaction.status}')">✎</button></td>
+                <td><button class="delete-btn" onclick="editTransaction(${transaction.id})">✎</button></td>
                 <td><button class="delete-btn" onclick="deleteTransaction(${transaction.id})">✕</button></td>
             `;
             tbody.appendChild(row);
@@ -132,24 +134,24 @@ async function toggleStatus(id) {
 }
 
 let editingId = null;
+let editingStatus = "planned";
+let transactionsById = {};
 
-function editTransaction(id, amount, type, category, description, date, status) {
+function editTransaction(id) {
+    const t = transactionsById[id];
+    if (!t) return;
     editingId = id;
-    document.getElementById("edit-amount").value = amount;
-    document.getElementById("edit-type").value = type;
-    document.getElementById("edit-category").value = category;
-    document.getElementById("edit-description").value = description;
-    document.getElementById("edit-date").value = date;
-    
-    // Kategorien im Edit-Dropdown laden
-    const select = document.getElementById("edit-category");
-    select.value = category;
-    
-    document.getElementById("edit-modal").style.display = "flex";
+    editingStatus = t.status;
+    document.getElementById("edit-amount").value = t.amount;
+    document.getElementById("edit-type").value = t.type;
+    document.getElementById("edit-category").value = t.category;
+    document.getElementById("edit-description").value = t.description || "";
+    document.getElementById("edit-date").value = t.date;
+    document.getElementById("edit-modal").classList.add("open");
 }
 
 function closeEditModal() {
-    document.getElementById("edit-modal").style.display = "none";
+    document.getElementById("edit-modal").classList.remove("open");
     editingId = null;
 }
 
@@ -238,7 +240,7 @@ async function loadBudgetGoals() {
             const typeLabel = goal.goal_type === "target" ? "Ziel" : "Limit";
             row.innerHTML = `
                 <div>
-                    <div class="budget-info">${goal.category}</div>
+                    <div class="budget-info">${escapeHtml(goal.category)}</div>
                     <div class="budget-nums">${typeLabel}: ${goal.limit} €</div>
                 </div>
                 <button class="delete-btn" onclick="deleteBudgetGoals(${goal.id})">✕</button>
@@ -306,7 +308,7 @@ function renderBudgetRow(item, container) {
     row.innerHTML = `
         <div style="flex:1">
             <div style="display:flex; justify-content:space-between;">
-                <div class="budget-info">${item.category}</div>
+                <div class="budget-info">${escapeHtml(item.category)}</div>
                 <div class="budget-nums">${label}</div>
             </div>
             <div class="progress-bar">
@@ -393,7 +395,7 @@ async function loadCategoryList() {
             const row = document.createElement("div");
             row.className = "budget-row";
             row.innerHTML = `
-                <div class="budget-info">${cat.name}</div>
+                <div class="budget-info">${escapeHtml(cat.name)}</div>
                 <button class="delete-btn" onclick="deleteCategory(${cat.id})">✕</button>
             `;
             container.appendChild(row);
@@ -473,8 +475,8 @@ async function loadUpcomingRecurring() {
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td style="${dateStyle}">${r.next_due}</td>
-                <td style="color:#666">${r.description || "—"}</td>
-                <td>${r.category}</td>
+                <td style="color:#666">${escapeHtml(r.description) || "—"}</td>
+                <td>${escapeHtml(r.category)}</td>
                 <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
                 <td>${r.amount.toFixed(2)} €</td>
             `;
@@ -1026,17 +1028,21 @@ document.addEventListener("DOMContentLoaded", () => {
             category: formData.get("category"),
             description: formData.get("description"),
             date: formData.get("date"),
-            status: "paid"
+            status: editingStatus
         };
 
-        await fetch(`/transactions/${editingId}`, {
-            method: "PUT",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(transaction)
-        });
-
-        showToast("Transaktion gespeichert");
-        closeEditModal();
-        loadTransactions();
+        try {
+            const response = await fetch(`/transactions/${editingId}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(transaction)
+            });
+            if (!response.ok) throw new Error();
+            showToast("Transaktion gespeichert");
+            closeEditModal();
+            loadTransactions();
+        } catch {
+            showToast("Fehler beim Speichern", "error");
+        }
     });
 });

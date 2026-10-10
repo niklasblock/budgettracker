@@ -12,7 +12,12 @@ dependencies = [
     "uvicorn",
     "sqlalchemy",
     "pyyaml",
+    "python-dateutil",
+    "pywebview",
 ]
+
+[project.optional-dependencies]
+build = ["pyinstaller"]
 
 [tool.setuptools.packages.find]
 where = ["."]
