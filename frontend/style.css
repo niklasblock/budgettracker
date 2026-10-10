@@ -428,24 +428,62 @@ tr:last-child td { border-bottom: none; }
 .upcoming-amount.out { color: var(--expense); }
 .upcoming-amount.in { color: var(--income); }
 
-/* ── Recurring filter tabs ── */
-.filter-tabs { display: flex; gap: 4px; margin-bottom: 1rem; }
-
-.filter-tab {
-    background: none;
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    padding: 5px 12px;
+/* ── Recurring grouping ── */
+.group-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem;
     font-size: 12px;
     color: var(--text-2);
-    cursor: pointer;
-    transition: all 0.1s;
 }
+.group-toolbar select { font-size: 12px; padding: 4px 8px; }
 
-.filter-tab.active {
-    background: var(--text);
-    color: var(--bg);
-    border-color: var(--text);
+.rec-group { margin-bottom: 1rem; }
+.rec-group:last-child { margin-bottom: 0; }
+
+.rec-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 2px;
+    margin-bottom: 6px;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    font-size: 12px;
+}
+.rec-group-chevron { color: var(--text-3); width: 10px; }
+.rec-group-title { font-weight: 500; color: var(--text); font-size: 13px; }
+.rec-group-count {
+    background: var(--surface-2);
+    color: var(--text-2);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 11px;
+}
+.rec-group-sum { margin-left: auto; color: var(--text-2); }
+.rec-group-sum.out { color: var(--expense); }
+.rec-group-sum.in { color: var(--income); }
+
+.row-actions { display: flex; align-items: center; gap: 4px; }
+.edit-btn {
+    background: none;
+    border: none;
+    color: var(--text-3);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+}
+.edit-btn:hover { color: var(--text); }
+
+tr.group-row td {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-3);
+    background: var(--surface-2);
 }
 
 /* ── Toast ── */
@@ -509,7 +547,8 @@ tr:last-child td { border-bottom: none; }
 }
 
 /* ── Edit modal ── */
-#edit-modal {
+#edit-modal,
+#recurring-edit-modal {
     display: none;
     position: fixed;
     inset: 0;
@@ -519,7 +558,8 @@ tr:last-child td { border-bottom: none; }
     justify-content: center;
 }
 
-#edit-modal.open { display: flex; }
+#edit-modal.open,
+#recurring-edit-modal.open { display: flex; }
 
 .edit-box {
     background: var(--surface);

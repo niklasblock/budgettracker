@@ -16,6 +16,15 @@ class RecurringCreate(BaseModel):
     next_due: date
 
 
+class RecurringUpdate(BaseModel):
+    amount: float
+    type: str
+    category: str
+    description: str | None = None
+    interval: str
+    next_due: date
+
+
 router = APIRouter() 
 
 
@@ -89,6 +98,24 @@ def get_upcoming_recurring(db: Session = Depends(get_db)):
         })
 
     return result
+
+
+@router.put("/recurring/{recurring_id}")
+def update_recurring(recurring_id: int, data: RecurringUpdate, db: Session = Depends(get_db)):
+    """Update an existing recurring transaction"""
+    recurring_transaction = db.query(RecurringTransaction)\
+                            .filter(RecurringTransaction.id == recurring_id)\
+                            .first()
+
+    if not recurring_transaction:
+        raise HTTPException(status_code=404, detail="Recurring Transaction not found")
+
+    for key, value in data.model_dump().items():
+        setattr(recurring_transaction, key, value)
+
+    db.commit()
+    db.refresh(recurring_transaction)
+    return recurring_transaction
 
 
 @router.delete("/recurring/{recurring_id}")

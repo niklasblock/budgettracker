@@ -364,7 +364,7 @@ async function loadCategories() {
         if (!response.ok) throw new Error();
         const data = await response.json();
 
-        const selects = ["category", "bg-category", "rec-category", "edit-category", "modal-category"];
+        const selects = ["category", "bg-category", "rec-category", "rec-edit-category", "edit-category", "modal-category"];
         selects.forEach(id => {
             const select = document.getElementById(id);
             select.innerHTML = '<option value="">Kategorie wählen</option>';
@@ -444,7 +444,6 @@ async function loadUpcomingRecurring() {
                     <th>Fällig</th>
                     <th>Beschreibung</th>
                     <th>Kategorie</th>
-                    <th>Intervall</th>
                     <th>Typ</th>
                     <th>Betrag</th>
                 </tr>
@@ -452,7 +451,19 @@ async function loadUpcomingRecurring() {
         `;
         const tbody = document.createElement("tbody");
 
-        inWindow.forEach(r => {
+        const sortedWindow = [...inWindow].sort((a, b) =>
+            INTERVAL_ORDER.indexOf(a.interval) - INTERVAL_ORDER.indexOf(b.interval) ||
+            a.next_due.localeCompare(b.next_due));
+        let lastInterval = null;
+
+        sortedWindow.forEach(r => {
+            if (r.interval !== lastInterval) {
+                lastInterval = r.interval;
+                const groupRow = document.createElement("tr");
+                groupRow.className = "group-row";
+                groupRow.innerHTML = `<td colspan="5">${INTERVAL_LABELS[r.interval] || r.interval}</td>`;
+                tbody.appendChild(groupRow);
+            }
             const dueDate = new Date(r.next_due);
             const isPast = dueDate < today;
             const badgeClass = r.type === "income" ? "badge-income" : "badge-expense";
@@ -464,7 +475,6 @@ async function loadUpcomingRecurring() {
                 <td style="${dateStyle}">${r.next_due}</td>
                 <td style="color:#666">${r.description || "—"}</td>
                 <td>${r.category}</td>
-                <td style="color:#888; font-size:12px;">${INTERVAL_LABELS[r.interval] || r.interval}</td>
                 <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
                 <td>${r.amount.toFixed(2)} €</td>
             `;
@@ -494,12 +504,6 @@ async function loadUpcomingRecurring() {
         showInlineError("upcoming-recurring-body");
     }
 }
-function filterRecurring(interval, btn) {
-    document.querySelectorAll("#recurring-filter-tabs .filter-tab").forEach(b => b.classList.remove("active"));
-    if (btn) btn.classList.add("active");
-    renderRecurringList(interval);
-}
-
 const INTERVAL_LABELS = {
     weekly: "Wöchentlich",
     monthly: "Monatlich",
@@ -507,44 +511,156 @@ const INTERVAL_LABELS = {
     yearly: "Jährlich"
 };
 
+const INTERVAL_ORDER = ["weekly", "monthly", "quarterly", "yearly"];
+
+// Faktor, um jeden Betrag auf einen Monat umzurechnen
+const MONTHLY_FACTOR = { weekly: 52 / 12, monthly: 1, quarterly: 1 / 3, yearly: 1 / 12 };
+
 let allRecurring = [];
+let recurringGroupBy = "interval";
+const collapsedGroups = new Set();
+
+function setRecurringGroupBy(value) {
+    recurringGroupBy = value;
+    renderRecurringList();
+}
+
+function toggleRecurringGroup(key) {
+    if (collapsedGroups.has(key)) collapsedGroups.delete(key);
+    else collapsedGroups.add(key);
+    renderRecurringList();
+}
+
+function escapeHtml(str) {
+    return String(str ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+}
 
 async function loadRecurring() {
     try {
         const response = await fetch("/recurring"); 
         if (!response.ok) throw new Error();
         allRecurring = await response.json(); 
-        renderRecurringList("all");
+        renderRecurringList();
     } catch {
         showInlineError("recurring-list");
     }
 }
 
-function renderRecurringList(interval) {
+function groupRecurring(items, mode) {
+    // -> [{key, label, items}]
+    if (mode === "none") return [{ key: "all", label: null, items }];
+
+    const groups = new Map();
+    items.forEach(r => {
+        let key, label;
+        if (mode === "interval") { key = r.interval; label = INTERVAL_LABELS[r.interval] || r.interval; }
+        else if (mode === "category") { key = r.category; label = r.category; }
+        else { key = r.type; label = r.type === "income" ? "Einnahmen" : "Ausgaben"; }
+        if (!groups.has(key)) groups.set(key, { key, label, items: [] });
+        groups.get(key).items.push(r);
+    });
+
+    const list = [...groups.values()];
+    if (mode === "interval") {
+        list.sort((a, b) => INTERVAL_ORDER.indexOf(a.key) - INTERVAL_ORDER.indexOf(b.key));
+    } else {
+        list.sort((a, b) => a.label.localeCompare(b.label, "de"));
+    }
+    list.forEach(g => g.items.sort((a, b) => a.next_due.localeCompare(b.next_due)));
+    return list;
+}
+
+function monthlyNet(items) {
+    // Netto pro Monat (Einnahmen positiv, Ausgaben negativ)
+    return items.reduce((sum, r) => {
+        const v = r.amount * (MONTHLY_FACTOR[r.interval] ?? 1);
+        return sum + (r.type === "income" ? v : -v);
+    }, 0);
+}
+
+function formatEuro(value) {
+    return value.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+}
+
+function renderRecurringList() {
     const container = document.getElementById("recurring-list"); 
     container.innerHTML = ""; 
 
-    const filtered = interval === "all"
-        ? allRecurring
-        : allRecurring.filter(r => r.interval === interval);
-
-    if (filtered.length === 0) {
-        container.innerHTML = `<p style="font-size:13px; color:#666; margin-top:8px;">Keine Daueraufträge gefunden.</p>`;
+    if (allRecurring.length === 0) {
+        container.innerHTML = `<p style="font-size:13px; color:var(--text-2); margin-top:8px;">Keine Daueraufträge gefunden.</p>`;
         return;
     }
 
-    filtered.forEach(r => {
-        const row = document.createElement("div");
-        row.className = "budget-row";
-        row.innerHTML = `
-            <div>
-                <div class="budget-info">${r.description || "—"}</div>
-                <div class="budget-nums">${r.category} · ${r.amount} € · ${INTERVAL_LABELS[r.interval] || r.interval} · nächste Ausführung: ${r.next_due}</div>
-            </div>
-            <button class="delete-btn" onclick="deleteRecurring(${r.id})">✕</button>
-        `;
-        container.appendChild(row);
+    groupRecurring(allRecurring, recurringGroupBy).forEach(group => {
+        const section = document.createElement("div");
+        section.className = "rec-group";
+        const collapsed = collapsedGroups.has(group.key);
+
+        if (group.label !== null) {
+            const net = monthlyNet(group.items);
+            const header = document.createElement("div");
+            header.className = "rec-group-header";
+            header.onclick = () => toggleRecurringGroup(group.key);
+            header.innerHTML = `
+                <span class="rec-group-chevron">${collapsed ? "▸" : "▾"}</span>
+                <span class="rec-group-title">${escapeHtml(group.label)}</span>
+                <span class="rec-group-count">${group.items.length}</span>
+                <span class="rec-group-sum ${net < 0 ? "out" : "in"}" title="Netto pro Monat (umgerechnet)">
+                    ${formatEuro(net)} / Monat
+                </span>
+            `;
+            section.appendChild(header);
+        }
+
+        if (!collapsed) {
+            group.items.forEach(r => {
+                const row = document.createElement("div");
+                row.className = "budget-row";
+                const sign = r.type === "income" ? "+" : "−";
+                const meta = [];
+                if (recurringGroupBy !== "category") meta.push(escapeHtml(r.category));
+                if (recurringGroupBy !== "interval") meta.push(INTERVAL_LABELS[r.interval] || r.interval);
+                meta.push(`${sign}${formatEuro(r.amount)}`);
+                meta.push(`nächste Ausführung: ${r.next_due}`);
+                row.innerHTML = `
+                    <div>
+                        <div class="budget-info">${escapeHtml(r.description) || "—"}</div>
+                        <div class="budget-nums">${meta.join(" · ")}</div>
+                    </div>
+                    <div class="row-actions">
+                        <button class="edit-btn" title="Bearbeiten" onclick="editRecurring(${r.id})">✎</button>
+                        <button class="delete-btn" title="Löschen" onclick="deleteRecurring(${r.id})">✕</button>
+                    </div>
+                `;
+                section.appendChild(row);
+            });
+        }
+        container.appendChild(section);
     });
+}
+
+// --- Edit Recurring
+let editingRecurringId = null;
+
+function editRecurring(id) {
+    const r = allRecurring.find(x => x.id === id);
+    if (!r) return;
+    editingRecurringId = id;
+    document.getElementById("rec-edit-amount").value = r.amount;
+    document.getElementById("rec-edit-type").value = r.type;
+    document.getElementById("rec-edit-category").value = r.category;
+    document.getElementById("rec-edit-interval").value = r.interval;
+    document.getElementById("rec-edit-next-due").value = r.next_due;
+    document.getElementById("rec-edit-description").value = r.description || "";
+    document.getElementById("recurring-edit-error").style.display = "none";
+    document.getElementById("recurring-edit-modal").classList.add("open");
+}
+
+function closeRecurringEditModal() {
+    document.getElementById("recurring-edit-modal").classList.remove("open");
+    editingRecurringId = null;
 }
 
 async function deleteRecurring(id) {
@@ -833,6 +949,39 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast("Fehler beim Speichern", "error");
         }
     });
+    document.getElementById("recurring-edit-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const recurring = {
+            amount: parseFloat(formData.get("amount")),
+            type: formData.get("type"),
+            category: formData.get("category"),
+            description: formData.get("description") || null,
+            interval: formData.get("interval"),
+            next_due: formData.get("next_due")
+        };
+
+        if (!recurring.amount || !recurring.category || !recurring.next_due) {
+            document.getElementById("recurring-edit-error").style.display = "block";
+            return;
+        }
+
+        try {
+            const response = await fetch(`/recurring/${editingRecurringId}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(recurring)
+            });
+            if (!response.ok) throw new Error();
+            showToast("Dauerauftrag gespeichert");
+            closeRecurringEditModal();
+            loadRecurring();
+            loadUpcomingRecurring();
+        } catch {
+            showToast("Fehler beim Speichern", "error");
+        }
+    });
+
     document.getElementById("add-modal-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);

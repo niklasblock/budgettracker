@@ -63,6 +63,13 @@ def startup():
     Base.metadata.create_all(bind=engine)
     process_recurring_transactions()
 
+INTERVAL_STEPS = {
+    "weekly": relativedelta(weeks=1),
+    "monthly": relativedelta(months=1),
+    "quarterly": relativedelta(months=3),
+    "yearly": relativedelta(years=1),
+}
+
 def process_recurring_transactions():
     """Check for due recurring transactions and create them"""
     db = SessionLocal()
@@ -73,19 +80,19 @@ def process_recurring_transactions():
                 .all()
         
         for r in due:
-            # Neue Transaktion erstellen
-            transaction = Transaction(
-                amount=r.amount,
-                type=r.type,
-                category=r.category,
-                description=r.description,
-                date=r.next_due,
-                status="planned"
-            )
-            db.add(transaction)
-            
-            # next_due um einen Monat verschieben
-            r.next_due = r.next_due + relativedelta(months=1)
+            step = INTERVAL_STEPS.get(r.interval, relativedelta(months=1))
+            # Alle verpassten Ausführungen nachholen (z.B. wenn die App länger nicht lief)
+            while r.next_due <= today:
+                transaction = Transaction(
+                    amount=r.amount,
+                    type=r.type,
+                    category=r.category,
+                    description=r.description,
+                    date=r.next_due,
+                    status="planned"
+                )
+                db.add(transaction)
+                r.next_due = r.next_due + step
         
         db.commit()
     finally:

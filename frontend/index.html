@@ -244,12 +244,14 @@
 
             <div class="card">
                 <div class="card-header"><div class="card-title">Alle Daueraufträge</div></div>
-                <div class="filter-tabs" id="recurring-filter-tabs">
-                    <button class="filter-tab active" onclick="filterRecurring('all', this)">Alle</button>
-                    <button class="filter-tab" onclick="filterRecurring('monthly', this)">Monatlich</button>
-                    <button class="filter-tab" onclick="filterRecurring('weekly', this)">Wöchentlich</button>
-                    <button class="filter-tab" onclick="filterRecurring('quarterly', this)">Quartal</button>
-                    <button class="filter-tab" onclick="filterRecurring('yearly', this)">Jährlich</button>
+                <div class="group-toolbar">
+                    <label for="recurring-group-by">Gruppieren nach</label>
+                    <select id="recurring-group-by" onchange="setRecurringGroupBy(this.value)">
+                        <option value="interval">Intervall</option>
+                        <option value="category">Kategorie</option>
+                        <option value="type">Einnahme / Ausgabe</option>
+                        <option value="none">Keine Gruppierung</option>
+                    </select>
                 </div>
                 <div id="recurring-list"></div>
             </div>
@@ -413,6 +415,56 @@
             <div style="display:flex; gap:8px; margin-top:8px;">
                 <button type="submit">Speichern</button>
                 <button type="button" class="btn-secondary" onclick="closeEditModal()">Abbrechen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Recurring Modal -->
+<div id="recurring-edit-modal">
+    <div class="edit-box">
+        <h2>Dauerauftrag bearbeiten</h2>
+        <form id="recurring-edit-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="rec-edit-amount">Betrag</label>
+                    <input type="number" id="rec-edit-amount" name="amount" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="rec-edit-type">Typ</label>
+                    <select id="rec-edit-type" name="type">
+                        <option value="income">Einnahme</option>
+                        <option value="expense">Ausgabe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rec-edit-category">Kategorie</label>
+                    <select id="rec-edit-category" name="category">
+                        <option value="">Kategorie wählen</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rec-edit-interval">Intervall</label>
+                    <select id="rec-edit-interval" name="interval">
+                        <option value="monthly">Monatlich</option>
+                        <option value="weekly">Wöchentlich</option>
+                        <option value="quarterly">Quartalsweise</option>
+                        <option value="yearly">Jährlich</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rec-edit-next-due">Nächste Ausführung</label>
+                    <input type="date" id="rec-edit-next-due" name="next_due">
+                </div>
+                <div class="form-group full">
+                    <label for="rec-edit-description">Beschreibung</label>
+                    <input type="text" id="rec-edit-description" name="description">
+                </div>
+            </div>
+            <p id="recurring-edit-error" style="color:var(--expense); font-size:12px; margin-bottom:8px; display:none;">Bitte alle Pflichtfelder ausfüllen.</p>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <button type="submit">Speichern</button>
+                <button type="button" class="btn-secondary" onclick="closeRecurringEditModal()">Abbrechen</button>
             </div>
         </form>
     </div>
